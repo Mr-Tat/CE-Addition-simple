@@ -35,7 +35,14 @@ function apply(s){
  const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Brussels',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
  put('mathas_points_v1_addition-simple',{version:1,day:today,top:(s.todayBest?.day===today?[{points:s.todayBest.points}]:[]),bestOne:{points:best},bestThree:top.map(points=>({points}))});
 }
-if(mode==='connected')apply(initial);
+if(mode==='connected'){
+ apply(initial);
+ if(initial?.rewards)localStorage.setItem('mathas_trophies_v3_addition-simple',JSON.stringify(initial.rewards));
+}
+function currentRewards(){
+ try{return JSON.parse(localStorage.getItem('mathas_trophies_v3_addition-simple')||'null')}catch{return null}
+}
+
 const bridge=`<script>
 (function(){
  const pilot=window.parent.MathasPilotBridge; if(!pilot)return;
@@ -59,6 +66,7 @@ window.MathasPilotBridge={completed:async item=>{
  const points=Math.max(0,Math.round(window.MathasPilotBridge.points(item)));
  const eventId=crypto.randomUUID();
  let body={action:'game-record',classId,appKey:APP,eventId,expectedRevision:revision,mode:modeKey,level,score,total:sudden?null:total,points};
+ const awards=currentRewards();if(awards?.version===3)body.rewards=awards;
  for(let attempt=0;attempt<3;attempt++){
   const t=(await cloud.auth.getSession()).data.session;
   if(!t)break;
