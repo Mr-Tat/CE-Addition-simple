@@ -1,0 +1,77 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Addition écrite simple · Connect — Pilote</title><style>body{font-family:system-ui;background:#0c2235;color:white;margin:0;padding:25px}#loading{max-width:620px;margin:12vh auto;padding:25px;border:1px solid #628ba7;border-radius:16px}a{color:#8ce7fc}</style></head><body><main id="loading"><h1>Math’as · Addition écrite simple</h1><p id="message">Vérification du mode et chargement de la copie fidèle V6.0.2…</p><p><a href="https://mr-tat.github.io/Mathas-Connect/">Retour au HUB Connect</a></p></main><script type="module">
+const URL='https://awmhpfofacaglewammxt.supabase.co',KEY='sb_publishable_oI2Pyl3kXzmLkK-CBnw9Nw_66a4fZgM',APP='addition-ecrite-simple';
+const query=new URLSearchParams(location.search),classId=query.get('class')||'',UUID=/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i;
+const free=localStorage.getItem('mathas.connect.mode-libre.v1')==='1';let session=null,cloud=null,mode='free',revision=0,initial=null;
+const status=s=>document.getElementById('message').textContent=s;
+const original=await fetch('./game-original.html',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('Copie du jeu non disponible');return r.text()});
+try{
+ if(!free&&UUID.test(classId)){
+  const {createClient}=await import('https://esm.sh/@supabase/supabase-js@2.95.0');
+  const sb=createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+  session=(await sb.auth.getSession()).data.session;
+  if(session?.user?.is_anonymous){
+   const r=await fetch(URL+'/functions/v1/connect-results',{method:'POST',headers:{apikey:KEY,authorization:'Bearer '+session.access_token,'content-type':'application/json'},body:JSON.stringify({action:'student-load',classId,appKey:APP})});
+   const x=await r.json();if(r.ok&&x.ok){mode='connected';revision=x.revision;initial=x.state;cloud=sb;}else status('Accès Connect non autorisé : utilisation locale.');
+  }
+ }
+}catch(e){status('Connexion indisponible : passage en mode libre.')}
+const ns='mathas.ce-addition.'+(mode==='connected'?'connect.'+session.user.id:'libre')+'.v1:',GKEYS=new Set();
+const native={get:Storage.prototype.getItem,set:Storage.prototype.setItem,remove:Storage.prototype.removeItem};
+function key(k){const s=String(k);return /^(addition|mathas_)/.test(s)?ns+s:s}
+Storage.prototype.getItem=function(k){return native.get.call(this,this===localStorage?key(k):k)};
+Storage.prototype.setItem=function(k,v){return native.set.call(this,this===localStorage?key(k):k,v)};
+Storage.prototype.removeItem=function(k){return native.remove.call(this,this===localStorage?key(k):k)};
+function put(k,v){localStorage.setItem(k,JSON.stringify(v))}
+function apply(s){
+ if(!s)return;
+ const toLevel=i=>[3,5,7][i];
+ const cls={};(s.classic||[]).forEach((row,i)=>{if(row&&Object.keys(row).length)cls[toLevel(i)]=row});
+ put('addition_classic_v1',cls);
+ const sud={};(s.sudden||[]).forEach((v,i)=>{if(v!=null)sud[toLevel(i)]=v});put('addition_sudden_v1',sud);
+ const hard={};(s.hard||[]).forEach((v,i)=>{if(v!=null)hard[String(i+1)]=v});put('addition1_hard_sudden_v1',hard);
+ put('mathas_progression_addition_simple_v1',s.progress||{});
+ const top=Array.isArray(s.topThree)?s.topThree:[];
+ const best=s.bestPoints??0;
+ const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Brussels',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ put('mathas_points_v1_addition-simple',{version:1,day:today,top:(s.todayBest?.day===today?[{points:s.todayBest.points}]:[]),bestOne:{points:best},bestThree:top.map(points=>({points}))});
+}
+if(mode==='connected')apply(initial);
+const bridge=`<script>
+(function(){
+ const pilot=window.parent.MathasPilotBridge; if(!pilot)return;
+ let original=window.__setLastWork;
+ if(typeof original==='function')window.__setLastWork=function(x){original(x);pilot.completed({...x,at:new Date().toISOString()})};
+})();
+<\/script>`;
+let html=original.replaceAll('./logo-m.png','https://mr-tat.github.io/Addition-ecrite-simple/logo-m.png').replaceAll('./logo-mot.webp','https://mr-tat.github.io/Addition-ecrite-simple/logo-mot.webp').replaceAll('./illustration.webp','https://mr-tat.github.io/Addition-ecrite-simple/illustration.webp');
+html=html.replace('</body>',bridge+'</body>');
+// The child frame uses the same origin and isolated storage keys. No public classic game is changed.
+const iframe=document.createElement('iframe');iframe.title='Addition écrite simple V6.0.2';iframe.style.cssText='border:0;width:100%;height:100vh;display:block';iframe.setAttribute('allow','fullscreen');
+window.MathasPilotBridge={completed:async item=>{
+ if(mode!=='connected'||!cloud)return;
+ const label=item.label||'',match=label.match(/(?:Niveau|NIV)\\s*([123])/i);if(!match)return;
+ const level=Number(match[1]),hard=/HARD/i.test(label),sudden=/Mort subite/i.test(label);
+ const scoreText=String(item.score||'');const result=scoreText.match(/^(\\d+)(?:\\s*\\/\\s*(\\d+))?$/);if(!result)return;
+ const score=Number(result[1]),total=result[2]?Number(result[2]):null;
+ if(!sudden&&![4,10,20].includes(total))return;
+ const modeKey=hard?'hard':sudden?'sudden':'classic';
+ const points=Math.max(0,Math.round(window.MathasPilotBridge.points(item)));
+ const eventId=crypto.randomUUID();
+ let body={action:'game-record',classId,appKey:APP,eventId,expectedRevision:revision,mode:modeKey,level,score,total:sudden?null:total,points};
+ for(let attempt=0;attempt<3;attempt++){
+  const t=(await cloud.auth.getSession()).data.session;
+  if(!t)break;
+  const res=await fetch(URL+'/functions/v1/connect-results',{method:'POST',headers:{apikey:KEY,authorization:'Bearer '+t.access_token,'content-type':'application/json'},body:JSON.stringify(body)});
+  const out=await res.json();
+  if(out.ok){revision=out.revision;return}
+  if(out.error!=='revision_conflict')break;
+  const read=await fetch(URL+'/functions/v1/connect-results',{method:'POST',headers:{apikey:KEY,authorization:'Bearer '+t.access_token,'content-type':'application/json'},body:JSON.stringify({action:'student-load',classId,appKey:APP})});
+  const fresh=await read.json();if(!fresh.ok)break;
+  body.expectedRevision=revision=fresh.revision;
+ }
+ console.warn('Connect : résultat non synchronisé, nouvelle tentative requise',item);
+},points:item=>{const m=String(item.score||'').match(/^(\\d+)(?:\\s*\\/\\s*(\\d+))?$/);if(!m)return 0;const hard=/HARD/i.test(item.label),sudden=/Mort subite/i.test(item.label),n=Number(m[1]),total=m[2]?Number(m[2]):0;const level=Number((String(item.label).match(/(?:Niveau|NIV)\\s*([123])/i)||[])[1]||1);const ml=[1,1.2,1.4,1.6,1.8,2][hard?level+2:level-1],mf=sudden?1.6:total===20?1.6:total===10?1.3:1;let weighted=n;if(sudden){weighted=0;for(let i=0;i<n;i++)weighted+=Math.min(4,Math.pow(1.035,i))}return 5*ml*mf*weighted}};
+iframe.srcdoc=html;
+document.body.replaceChildren(iframe);
+document.body.style.cssText='margin:0;padding:0;background:#071e2a';
+</script></body></html>
