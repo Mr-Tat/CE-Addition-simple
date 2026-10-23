@@ -27,6 +27,17 @@ try{
   }
  }
 }catch(e){status('Connexion indisponible : passage en mode libre.')}
+// Mode Connect demandé : ne pas basculer silencieusement vers un profil local.
+if(!free&&UUID.test(classId)&&mode!=='connected'){
+ const view=document.getElementById('loading');
+ document.getElementById('message').textContent='Impossible de confirmer le compte Connecté. Aucun résultat ne sera enregistré dans Supabase tant que la connexion n’est pas rétablie.';
+ const actions=document.createElement('div');actions.style.cssText='display:flex;gap:10px;flex-wrap:wrap;margin-top:20px';
+ const retry=document.createElement('button');retry.textContent='Réessayer la connexion';retry.onclick=()=>location.reload();
+ const classic=document.createElement('button');classic.textContent='Jouer en Mode Classique (sans synchronisation)';
+ classic.onclick=()=>{localStorage.setItem('mathas.connect.mode-libre.v1','1');location.reload()};
+ for(const b of [retry,classic])b.style.cssText='padding:12px;border:0;border-radius:10px;background:#176e8d;color:white;font:600 13px system-ui;cursor:pointer';
+ actions.append(retry,classic);view.appendChild(actions);
+}else{
 const ns='mathas.ce-addition.'+(mode==='connected'?'connect.'+session.user.id:'libre')+'.v1:',GKEYS=new Set();
 const native={get:Storage.prototype.getItem,set:Storage.prototype.setItem,remove:Storage.prototype.removeItem};
 function key(k){const s=String(k);return /^(addition|mathas_)/.test(s)?ns+s:s}
@@ -210,4 +221,5 @@ const migration=document.createElement('button');migration.type='button';migrati
 migration.style.cssText='flex:none;background:#135d80;color:white;border:1px solid #70bddc;border-radius:7px;padding:5px 9px;font:600 12px system-ui;cursor:pointer';
 migration.title='Import temporaire depuis Addition écrite simple V6.0.2';migration.onclick=offerImport;
 const identityGroup=document.createElement('div');identityGroup.style.cssText='display:flex;align-items:center;gap:9px;min-width:0';identityGroup.append(statusLabel,migration);toolbar.replaceChild(identityGroup,statusLabel);showSync();if(mode==='connected')drain();
+}
 </script></body></html>
