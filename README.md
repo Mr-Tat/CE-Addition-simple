@@ -1,31 +1,43 @@
-# CE-Addition-simple — Math’as Connect (pilote)
+# CE-Addition-simple — pilote Math’as Connect
 
-Version de jeu : **copie intégrale de la V6.0.2**, conservée dans `game-original.html` et provenant de `Mr-Tat/Addition-ecrite-simple` (Git blob d’origine : `764335bdde1558de6caf362cbcc6239c12321d41`).
+**État : pilote fonctionnel, corrections de fiabilité V1 intégrées le 23 octobre 2026.**
 
-## Accès au pilote
-- https://mr-tat.github.io/CE-Addition-simple/?class=4bf3400d-a315-4ea4-a2f3-afaca24dc9b9
-- Ouvrir dans un navigateur ayant été approuvé par un enseignant dans Math’as Connect.
-- Si le HUB est en **Mode libre** ou si le profil Connect n'est pas autorisé, le jeu utilise uniquement ses sauvegardes locales.
-- Le professeur consulte les résultats dans Math’as Connect → Résultats des élèves → Addition écrite simple.
+## Liens
+- Jeu Connect : https://mr-tat.github.io/CE-Addition-simple/
+- Ancien jeu V6.0.2 : https://mr-tat.github.io/Addition-ecrite-simple/
+- HUB : https://mr-tat.github.io/Mathas-Connect/
+- Contrat actuel : https://github.com/Mr-Tat/Mathas-Connect/blob/main/docs/CONNECT_V1_ETAT_REEL_2026-10-23.md
 
-## Architecture
-- `game-original.html` : copie source figée, moteur pédagogique V6.0.2 non modifié.
-- `index.html` : chargeur de pilote ; sélection libre/Connect, initialisation du stockage privé, contrôle API, iframe du jeu, enregistrement de fin de partie.
-- Dans le navigateur, les clés historiques du jeu sont préfixées par `mathas.ce-addition.libre.v1:` ou `mathas.ce-addition.connect.<authUserId>.v1:`, afin de ne jamais modifier les sauvegardes de l'application classique ni celles d'un autre élève.
-- En Connect, un seul appel de lecture au démarrage, puis une écriture **par exercice terminé** (aucun appel par chiffre saisi). En cas de conflit de révision, relecture et nouvel essai, sans écraser l'autre appareil.
-- Les résultats de laboratoire existants, utilisant `app_key=connect-lab`, restent distincts ; l'application pilote emploie `app_key=addition-ecrite-simple`.
+## Fichiers
+- `game-original.html` : copie **intégrale et inchangée** de l'ancienne V6.0.2 (source Git blob `764335bdde1558de6caf362cbcc6239c12321d41`).
+- `index.html` : chargeur Classique/Connecté, identifiant élève, cloisonnement localStorage, synchronisation, file locale hors ligne, gestion Master et bandeau.
+- `legacy-import.js` : récupération volontaire des anciens records, points, trophées et déblocages vers Connecté.
 
-## Limites à vérifier avant ouverture aux élèves
-- **Pilote non validé par des parcours navigateur réels.** La syntaxe du chargeur a été vérifiée ; synchronisation, modes de jeu, Master Mode, reset et changement d'identité nécessitent des tests utilisateurs.
-- L'iframe est une enveloppe technique et n'est pas une réécriture du jeu. Certains éléments, notamment le plein écran ou les événements d'interface, doivent être testés.
-- Le connecteur récupère les parties à partir de l'événement `__setLastWork` : les résultats Classic, Mort subite et HARD restent à vérifier au regard des règles de génération de points. Les défis HARD à cinq calculs ne sont pas encore envoyés, conformément au contrat du pilote.
-- Les **trois ressources graphiques** (`logo-m.png`, `logo-mot.webp`, `illustration.webp`) sont actuellement référencées depuis GitHub Pages de l'ancienne application. Les copier dans ce nouveau repository avant d'archiver ou supprimer l'ancien dépôt. Ne pas supprimer l'ancien dépôt avant ce rapatriement.
-- Les trophées et médailles restent un affichage et un stockage propres au jeu ; seul le progrès synthétique et les scores sélectionnés sont envoyés au suivi du professeur. La synchronisation de la collection des trophées entre appareils reste à étudier pour garantir une copie fonctionnelle fidèle.
-- Les erreurs réseau d'enregistrement nécessitent encore une interface de reprise ; ne pas diffuser le pilote à des élèves avant validation.
-- Le jeu public `Mr-Tat/Addition-ecrite-simple` n'a pas été modifié.
+## Données
+- Ancienne V6.0.2 : stockage navigateur d'origine conservé intact.
+- Nouvelle version Mode Classique : stockage isolé `mathas.ce-addition.libre.v1:`.
+- Mode Connecté : stockage `mathas.ce-addition.connect.<authUserId>.v1:` et Supabase `app_key=addition-ecrite-simple`.
+- File différée : `ce-addition.pending.<authUserId>.v1`, événement UUID conservé jusqu'à confirmation.
+- Les noms GitHub et `app_key` Supabase sont indépendants.
+- Le même domaine `mr-tat.github.io` implique la même origine de stockage pour tous les dépôts Pages, d'où l'isolation explicite.
 
-## Contrat versionné
-La version pilote du backend de résultats est la fonction Supabase `connect-results` V3. Le code source du backend est maintenu dans `Mr-Tat/Mathas-Connect`.
+## Fonctionnalités
+- Séries classiques et Mort subite synchronisées et validées par les tests LBIDT/FOPA/Ju Tat.
+- Import depuis l'ancienne version réellement testé et confirmé, sans créer de fausses parties récentes.
+- Collection de trophées envoyée et restaurée depuis Connect.
+- HARD de cinq calculs : record `hardThree` synchronisé, sans points gamification (moteur V6.0.2 inchangé).
+- La file offline reprend lors du retour réseau, de l'activation d'onglet ou de l'ouverture du jeu.
+- Deux remises à zéro Master : en Connecté elles passent par l'API avec `resetEpoch` ; en Classique elles utilisent les règles locales de V6.0.2.
+- En cas d'échec d'authentification, le joueur doit choisir de réessayer ou de passer explicitement au Mode Classique.
 
-## Nomenclature adoptée
-`CE` = Calculs écrits. Les noms des repositories sont indépendants du type de connexion. Chaque migration vers Connect inclut une réflexion sur le nom.
+## Recette encore nécessaire
+Les **nouvelles** protections de file hors ligne, de resets Master et de records HARD n'ont pas encore été validées par des parcours de navigateur de bout en bout. Utiliser des profils de test pour les remises à zéro : **ne pas effacer Eleve.A**.
+
+## Dépendance de migration
+Les images `logo-m.png`, `logo-mot.webp`, `illustration.webp` sont actuellement chargées depuis l'ancien dépôt. **Ne pas supprimer ni rendre privé l'ancien repository avant de les rapatrier** ; il sert également aux imports historiques jusqu'à migration de tous les élèves.
+
+## Lignes rouges
+- Ne jamais modifier `Mr-Tat/Addition-ecrite-simple` lors de la migration.
+- Jamais de fichier de sauvegarde privé avec les noms d'élèves dans GitHub public.
+- Pas de réécriture du jeu pédagogique pour une amélioration de Connect.
+- Pour les nouveaux jeux, discuter le nom du repository et ses règles de résultats avant l'adaptation.
