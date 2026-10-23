@@ -51,7 +51,31 @@ async function offerImport(){
  if(!snap.meaningful){alert('Aucun ancien record détecté sur ce navigateur. Les records de la version classique doivent être présents dans ce même profil Chrome.');return}
  const context=mode==='connected'?'Connecté (élève actuellement autorisé)':'Classique (ce navigateur)';
  if(!confirm('Récupérer les anciens records et déblocages dans le mode '+context+' ?\\n\\nAssure-toi que les anciennes données de ce PC appartiennent bien à cet élève. Aucun ancien résultat ne sera effacé.'))return;
- if(mode==='connected'){alert('L’import Connecté sera proposé après sécurisation de la fusion cloud. Utilise le bouton en mode Classique pour récupérer les anciens résultats sur ce PC.');return}
+ if(mode==='connected'){
+  if(!cloud){alert('Connexion au compte indisponible. Aucun résultat modifié.');return}
+  const imported=legacyForCloud(snap);
+  try{
+   for(let attempt=0;attempt<3;attempt++){
+    const active=(await cloud.auth.getSession()).data.session;
+    if(!active){alert('Session Connecté expirée. Reconnecte-toi depuis le HUB.');return}
+    const headers={apikey:KEY,authorization:'Bearer '+active.access_token,'content-type':'application/json'};
+    const response=await fetch(URL+'/functions/v1/connect-results',{method:'POST',headers,body:JSON.stringify({action:'legacy-import',classId,appKey:APP,expectedRevision:revision,legacy:imported})});
+    const result=await response.json();
+    if(response.ok&&result.ok){
+     revision=result.revision;initial=result.state;apply(initial);
+     if(initial?.rewards)localStorage.setItem('mathas_trophies_v3_addition-simple',JSON.stringify(initial.rewards));
+     alert('Anciens records récupérés dans le compte Connecté ! Les sauvegardes originales sont conservées.');
+     location.reload();return;
+    }
+    if(result.error!=='revision_conflict'){alert('Import interrompu : '+(result.error||'erreur réseau')+'. Aucun ancien résultat supprimé.');return}
+    const read=await fetch(URL+'/functions/v1/connect-results',{method:'POST',headers,body:JSON.stringify({action:'student-load',classId,appKey:APP})});
+    const refreshed=await read.json();if(!read.ok||!refreshed.ok)break;
+    revision=refreshed.revision;
+   }
+   alert('Import non terminé à cause de mises à jour concurrentes. Réessaie plus tard.');
+  }catch(err){alert('Connexion interrompue : aucun ancien résultat supprimé. Réessaie après reconnexion.')}
+  return;
+ }
  importToClassic(snap,k=>localStorage.getItem(k),(k,v)=>localStorage.setItem(k,v));
  alert('Records et déblocages récupérés dans le mode Classique. Le jeu va se recharger.');location.reload()
 }
