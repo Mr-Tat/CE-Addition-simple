@@ -100,7 +100,7 @@ const bridge=`<script>
  if(typeof original==='function')window.__setLastWork=function(x){original(x);setTimeout(()=>pilot.completed({...x,at:new Date().toISOString()}),850)};
  document.addEventListener('click',function(ev){
    const btn=ev.target?.closest?.('button');
-   if(!btn||!window.__masterMode)return;
+   if(!btn||!window.__masterMode||pilot.mode!=='connected')return;
    const kind=btn.id==='masterModeReset'?'restart':btn.id==='masterModeEraseResults'?'erase-results':null;
    if(!kind)return;
    ev.preventDefault();ev.stopImmediatePropagation();
@@ -117,7 +117,7 @@ const queueKey='ce-addition.pending.'+(session?.user?.id||'free')+'.v1';
 const readQueue=()=>{try{const a=JSON.parse(localStorage.getItem(queueKey)||'[]');return Array.isArray(a)?a.slice(0,30):[]}catch{return []}};
 const saveQueue=q=>localStorage.setItem(queueKey,JSON.stringify(q.slice(0,30)));
 let draining=false;
-function showSync(){const v=document.getElementById('ce-sync');if(v)v.textContent=mode==='connected'?(readQueue().length?'En attente : '+readQueue().length:'Synchronisé'):''}
+function showSync(){const v=document.getElementById('ce-sync');if(v)v.textContent=mode==='connected'?(readQueue().length?'En attente : '+readQueue().length:(!navigator.onLine?'Hors ligne':'Synchronisé')):''}
 async function drain(){
  if(draining||mode!=='connected'||!cloud)return;
  draining=true;
@@ -143,6 +143,7 @@ async function drain(){
  }finally{draining=false;showSync()}
 }
 window.addEventListener('online',drain);
+window.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')drain()});
 async function resetInCloud(kind){
  if(mode!=='connected'||!cloud)return;
  const label=kind==='restart'?'Remettre à zéro les séries et les déblocages ? Les records Mort subite sont conservés.':'Effacer les scores, records et trophées ? La progression et les déblocages sont conservés.';
@@ -175,7 +176,7 @@ async function resetInCloud(kind){
   }
  }catch{alert('Connexion interrompue : aucune confirmation de remise à zéro. Rouvre le jeu pour vérifier les données.')}
 }
-window.MathasPilotBridge={reset:resetInCloud,completed:async item=>{
+window.MathasPilotBridge={mode,reset:resetInCloud,completed:async item=>{
  if(mode!=='connected'||!cloud)return;
  const label=item.label||'',match=label.match(/(?:Niveau|NIV)\s*([123])/i);if(!match)return;
  const level=Number(match[1]),hard=/HARD/i.test(label),sudden=/Mort subite/i.test(label);
