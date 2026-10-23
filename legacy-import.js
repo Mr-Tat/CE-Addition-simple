@@ -8,7 +8,7 @@ const KEYS={
 const FLAGS=['level2','level3','sudden1','sudden2','sudden3','perfect1','perfect2','perfect3','hard'];
 const levels=[3,5,7],lengths=[4,10,20],colors=['bronze','silver','gold'];
 const object=v=>v&&typeof v==='object'&&!Array.isArray(v)?v:{};
-const valid=(v,lim=100000)=>Number.isInteger(Number(v))&&Number(v)>=0&&Number(v)<=lim;
+const valid=(v,lim=100000)=>v!=null&&v!==''&&Number.isInteger(Number(v))&&Number(v)>=0&&Number(v)<=lim;
 const take=(v,lim)=>valid(v,lim)?Number(v):null;
 const arr3=(x,max)=>levels.map((_,i)=>take(object(x)[String(i+1)],max));
 function rewards(value){
@@ -32,7 +32,7 @@ const max=(a,b,limit)=>{const x=take(a,limit),y=take(b,limit);return x==null?y:y
 const mergeScores=(a,b)=>{const out={};for(const level of levels){const row={};for(const n of lengths){const v=max(object(a)[level]?.[n],object(b)[level]?.[n],n);if(v!=null)row[n]=v}if(Object.keys(row).length)out[level]=row}return out};
 const mergeSequence=(a,b,keys,limit)=>{const out={};for(const k of keys){const n=max(object(a)[k],object(b)[k],limit);if(n!=null)out[k]=n}return out};
 const mergeProgress=(a,b)=>{const out={};for(const k of FLAGS)out[k]=object(a)[k]===true||object(b)[k]===true;return out};
-function cleanPoints(v){return Number.isFinite(Number(v))&&Number(v)>=0&&Number(v)<=10000000?Number(v):null}
+function cleanPoints(v){return valid(v,10000000)?Number(v):null}
 function mergePoints(a,b){
  const x=object(a),y=object(b),p=v=>object(v);
  const pick=(v,w)=>cleanPoints(v?.points)>=cleanPoints(w?.points)?v:w;
