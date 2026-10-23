@@ -59,9 +59,30 @@ function apply(s){
  const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Brussels',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
  put('mathas_points_v1_addition-simple',{version:1,day:today,top:(s.todayBest?.day===today?[{points:s.todayBest.points}]:[]),bestOne:best==null?null:{points:best},bestThree:top.map(points=>({points}))});
 }
+// En mode Connecté, le serveur fait foi pour les records. Le jeu V6.0.2
+// possède aussi des caches (ancien dernier résultat, historique, trophées).
+// On les retire UNIQUEMENT de l'espace de cet élève avant chaque hydratation.
+function clearConnectedScoreCache(){
+ const names=[
+  'addition_classic_v1','addition_sudden_v1','addition1_hard_sudden_v1',
+  'addition1_hard_three_v1','addition1_last_work',
+  'mathas_progression_addition_simple_v1',
+  'mathas_points_v1_addition-simple','mathas_recent_two_scores_v1_addition-simple',
+  'mathas_trophies_v3_addition-simple','mathas_trophies_v2_addition-simple',
+  'mathas_trophies_v1_addition-simple','mathas_easy_trophies_v1_addition-simple'
+ ];
+ for(const name of names)localStorage.removeItem(name);
+ // Dans un iframe srcdoc, pathname varie selon le navigateur. Nettoyer
+ // toutes les anciennes variantes des historiques, mais pas les scores V6.0.2.
+ for(let i=localStorage.length-1;i>=0;i--){
+  const raw=localStorage.key(i);
+  if(raw?.startsWith(ns+'mathas_scores_'))native.remove.call(localStorage,raw);
+ }
+}
 if(mode==='connected'){
+ clearConnectedScoreCache();
  apply(initial);
- if(initial?.rewards)localStorage.setItem('mathas_trophies_v3_addition-simple',JSON.stringify(initial.rewards));else localStorage.removeItem('mathas_trophies_v3_addition-simple');
+ if(initial?.rewards)localStorage.setItem('mathas_trophies_v3_addition-simple',JSON.stringify(initial.rewards));
 }
 function currentRewards(){
  try{return JSON.parse(localStorage.getItem('mathas_trophies_v3_addition-simple')||'null')}catch{return null}
@@ -120,7 +141,12 @@ const bridge=`<script>
 })();
 <\/script>`;
 const scopedBootstrap='<script>(function(){var ns='+JSON.stringify(ns)+';var p=Storage.prototype;var g=p.getItem,s=p.setItem,r=p.removeItem;function key(k){k=String(k);return /^(addition|mathas_)/.test(k)?ns+k:k}p.getItem=function(k){return g.call(this,this===localStorage?key(k):k)};p.setItem=function(k,v){return s.call(this,this===localStorage?key(k):k,v)};p.removeItem=function(k){return r.call(this,this===localStorage?key(k):k)};})();<'+ '/script>';
+// Le panneau des records V6.0.2 peut reconstituer un ancien 10/10 à
+// partir d'un trophée conservé. Le trophée reste acquis, mais ne doit jamais
+// rétablir un record Classique effacé dans le compte Connecté.
+const masteryAsScore='for(let i=0;i<3;i++)for(const c of counts)if(master.mastery?.[c]?.[i]===true)keep(i+1,c,c);';
 let html=original.replaceAll('./logo-m.png','https://mr-tat.github.io/Addition-ecrite-simple/logo-m.png').replaceAll('./logo-mot.webp','https://mr-tat.github.io/Addition-ecrite-simple/logo-mot.webp').replaceAll('./illustration.webp','https://mr-tat.github.io/Addition-ecrite-simple/illustration.webp');
+if(mode==='connected'&&html.includes(masteryAsScore))html=html.replace(masteryAsScore,'/* Connect : trophée conservé, record classique non rétabli */');
 html=html.replace('<head>','<head>'+scopedBootstrap).replace('</body>',bridge+'</body>');
 // The child frame uses the same origin and isolated storage keys. No public classic game is changed.
 const iframe=document.createElement('iframe');iframe.title='Addition écrite simple V6.0.2';iframe.style.cssText='border:0;width:100%;height:calc(100dvh - 44px);display:block';iframe.setAttribute('allow','fullscreen');
@@ -170,6 +196,8 @@ async function resetInCloud(kind){
    const data=await res.json();
    if(res.ok&&data.ok){
      revision=data.revision;resetEpoch=data.resetEpoch;initial=data.state;saveQueue([]);
+     clearConnectedScoreCache();apply(initial);
+     if(initial?.rewards)localStorage.setItem('mathas_trophies_v3_addition-simple',JSON.stringify(initial.rewards));
      localStorage.removeItem('addition1_last_work');
      localStorage.removeItem('mathas_recent_two_scores_v1_addition-simple');
      localStorage.removeItem('mathas_scores_/addition-ecrite-simple/');
