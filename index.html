@@ -114,8 +114,8 @@ html=html.replace('<head>','<head>'+scopedBootstrap).replace('</body>',bridge+'<
 // The child frame uses the same origin and isolated storage keys. No public classic game is changed.
 const iframe=document.createElement('iframe');iframe.title='Addition écrite simple V6.0.2';iframe.style.cssText='border:0;width:100%;height:calc(100dvh - 44px);display:block';iframe.setAttribute('allow','fullscreen');
 const queueKey='ce-addition.pending.'+(session?.user?.id||'free')+'.v1';
-const readQueue=()=>{try{const a=JSON.parse(localStorage.getItem(queueKey)||'[]');return Array.isArray(a)?a.slice(0,30):[]}catch{return []}};
-const saveQueue=q=>localStorage.setItem(queueKey,JSON.stringify(q.slice(0,30)));
+const readQueue=()=>{try{const a=JSON.parse(localStorage.getItem(queueKey)||'[]');return Array.isArray(a)?a:[]}catch{return []}};
+const saveQueue=q=>{if(q.length>1000)throw Error('File de synchronisation saturée : ne pas terminer de nouvelles parties avant reconnexion.');localStorage.setItem(queueKey,JSON.stringify(q))};
 let draining=false;
 function showSync(){const v=document.getElementById('ce-sync');if(v)v.textContent=mode==='connected'?(readQueue().length?'En attente : '+readQueue().length:(!navigator.onLine?'Hors ligne':'Synchronisé')):''}
 async function drain(){
