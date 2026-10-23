@@ -43,15 +43,16 @@ const bridge=`<script>
  if(typeof original==='function')window.__setLastWork=function(x){original(x);pilot.completed({...x,at:new Date().toISOString()})};
 })();
 <\/script>`;
+const scopedBootstrap='<script>(function(){var ns='+JSON.stringify(ns)+';var p=Storage.prototype;var g=p.getItem,s=p.setItem,r=p.removeItem;function key(k){k=String(k);return /^(addition|mathas_)/.test(k)?ns+k:k}p.getItem=function(k){return g.call(this,this===localStorage?key(k):k)};p.setItem=function(k,v){return s.call(this,this===localStorage?key(k):k,v)};p.removeItem=function(k){return r.call(this,this===localStorage?key(k):k)};})();<\\/script>';
 let html=original.replaceAll('./logo-m.png','https://mr-tat.github.io/Addition-ecrite-simple/logo-m.png').replaceAll('./logo-mot.webp','https://mr-tat.github.io/Addition-ecrite-simple/logo-mot.webp').replaceAll('./illustration.webp','https://mr-tat.github.io/Addition-ecrite-simple/illustration.webp');
-html=html.replace('</body>',bridge+'</body>');
+html=html.replace('<head>','<head>'+scopedBootstrap).replace('</body>',bridge+'</body>');
 // The child frame uses the same origin and isolated storage keys. No public classic game is changed.
 const iframe=document.createElement('iframe');iframe.title='Addition écrite simple V6.0.2';iframe.style.cssText='border:0;width:100%;height:100vh;display:block';iframe.setAttribute('allow','fullscreen');
 window.MathasPilotBridge={completed:async item=>{
  if(mode!=='connected'||!cloud)return;
- const label=item.label||'',match=label.match(/(?:Niveau|NIV)\\s*([123])/i);if(!match)return;
+ const label=item.label||'',match=label.match(/(?:Niveau|NIV)\s*([123])/i);if(!match)return;
  const level=Number(match[1]),hard=/HARD/i.test(label),sudden=/Mort subite/i.test(label);
- const scoreText=String(item.score||'');const result=scoreText.match(/^(\\d+)(?:\\s*\\/\\s*(\\d+))?$/);if(!result)return;
+ const scoreText=String(item.score||'');const result=scoreText.match(/^(\d+)(?:\s*\\/\s*(\d+))?$/);if(!result)return;
  const score=Number(result[1]),total=result[2]?Number(result[2]):null;
  if(!sudden&&![4,10,20].includes(total))return;
  const modeKey=hard?'hard':sudden?'sudden':'classic';
@@ -70,7 +71,7 @@ window.MathasPilotBridge={completed:async item=>{
   body.expectedRevision=revision=fresh.revision;
  }
  console.warn('Connect : résultat non synchronisé, nouvelle tentative requise',item);
-},points:item=>{const m=String(item.score||'').match(/^(\\d+)(?:\\s*\\/\\s*(\\d+))?$/);if(!m)return 0;const hard=/HARD/i.test(item.label),sudden=/Mort subite/i.test(item.label),n=Number(m[1]),total=m[2]?Number(m[2]):0;const level=Number((String(item.label).match(/(?:Niveau|NIV)\\s*([123])/i)||[])[1]||1);const ml=[1,1.2,1.4,1.6,1.8,2][hard?level+2:level-1],mf=sudden?1.6:total===20?1.6:total===10?1.3:1;let weighted=n;if(sudden){weighted=0;for(let i=0;i<n;i++)weighted+=Math.min(4,Math.pow(1.035,i))}return 5*ml*mf*weighted}};
+},points:item=>{const m=String(item.score||'').match(/^(\d+)(?:\s*\\/\s*(\d+))?$/);if(!m)return 0;const hard=/HARD/i.test(item.label),sudden=/Mort subite/i.test(item.label),n=Number(m[1]),total=m[2]?Number(m[2]):0;const level=Number((String(item.label).match(/(?:Niveau|NIV)\s*([123])/i)||[])[1]||1);const ml=[1,1.2,1.4,1.6,1.8,2][hard?level+2:level-1],mf=sudden?1.6:total===20?1.6:total===10?1.3:1;let weighted=n;if(sudden){weighted=0;for(let i=0;i<n;i++)weighted+=Math.min(4,Math.pow(1.035,i))}return 5*ml*mf*weighted}};
 iframe.srcdoc=html;
 document.body.replaceChildren(iframe);
 document.body.style.cssText='margin:0;padding:0;background:#071e2a';
