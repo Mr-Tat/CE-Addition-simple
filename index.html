@@ -1,7 +1,7 @@
 <!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Addition écrite simple · Connect — Pilote</title><style>body{font-family:system-ui;background:#0c2235;color:white;margin:0;padding:25px}#loading{max-width:620px;margin:12vh auto;padding:25px;border:1px solid #628ba7;border-radius:16px}a{color:#8ce7fc}</style></head><body><main id="loading"><h1>Math’as · Addition écrite simple</h1><p id="message">Vérification du mode et chargement de la copie fidèle V6.0.2…</p><p><a href="https://mr-tat.github.io/Mathas-Connect/">Retour au HUB Connect</a></p></main><script type="module">
 const URL='https://awmhpfofacaglewammxt.supabase.co',KEY='sb_publishable_oI2Pyl3kXzmLkK-CBnw9Nw_66a4fZgM',APP='addition-ecrite-simple';
 const query=new URLSearchParams(location.search),classId=query.get('class')||'',UUID=/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i;
-const free=localStorage.getItem('mathas.connect.mode-libre.v1')==='1';let session=null,cloud=null,mode='free',revision=0,initial=null;
+const free=localStorage.getItem('mathas.connect.mode-libre.v1')==='1';let session=null,cloud=null,mode='free',revision=0,initial=null,studentName='';
 const status=s=>document.getElementById('message').textContent=s;
 const original=await fetch('./game-original.html',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('Copie du jeu non disponible');return r.text()});
 try{
@@ -11,7 +11,19 @@ try{
   session=(await sb.auth.getSession()).data.session;
   if(session?.user?.is_anonymous){
    const r=await fetch(URL+'/functions/v1/connect-results',{method:'POST',headers:{apikey:KEY,authorization:'Bearer '+session.access_token,'content-type':'application/json'},body:JSON.stringify({action:'student-load',classId,appKey:APP})});
-   const x=await r.json();if(r.ok&&x.ok){mode='connected';revision=x.revision;initial=x.state;cloud=sb;}else status('Accès Connect non autorisé : utilisation locale.');
+   const x=await r.json();if(r.ok&&x.ok){
+    mode='connected';revision=x.revision;initial=x.state;cloud=sb;
+    try{
+      const profileResponse=await fetch(URL+'/functions/v1/connect-api',{method:'POST',
+        headers:{apikey:KEY,authorization:'Bearer '+session.access_token,'content-type':'application/json'},
+        body:JSON.stringify({action:'student-me',classId})});
+      if(profileResponse.ok){
+        const profile=await profileResponse.json();
+        if(profile.ok&&profile.status==='approved'&&profile.classId===classId&&typeof profile.displayName==='string')
+          studentName=profile.displayName.trim().slice(0,70);
+      }
+    }catch(err){console.info('Nom du compte provisoirement indisponible.')}
+  }else status('Accès Connect non autorisé : utilisation locale.');
   }
  }
 }catch(e){status('Connexion indisponible : passage en mode libre.')}
@@ -50,7 +62,7 @@ async function offerImport(){
  const snap=legacySnapshot(originalRead);
  if(!snap.meaningful){alert('Aucun ancien record détecté sur ce navigateur. Les records de la version classique doivent être présents dans ce même profil Chrome.');return}
  const context=mode==='connected'?'Connecté (élève actuellement autorisé)':'Classique (ce navigateur)';
- if(!confirm('Récupérer les anciens records et déblocages dans le mode '+context+' ?\\n\\nAssure-toi que les anciennes données de ce PC appartiennent bien à cet élève. Aucun ancien résultat ne sera effacé.'))return;
+ if(!confirm('Importer les anciens records de CE Addition V6.0.2 vers '+(mode==='connected'?(studentName||'le compte élève connecté'):'le Mode Classique')+' ?\\n\\nIl faut être dans le même Chrome que les anciens scores. Les anciens records seront conservés.'))return;
  if(mode==='connected'){
   if(!cloud){alert('Connexion au compte indisponible. Aucun résultat modifié.');return}
   const imported=legacyForCloud(snap);
@@ -90,7 +102,7 @@ const scopedBootstrap='<script>(function(){var ns='+JSON.stringify(ns)+';var p=S
 let html=original.replaceAll('./logo-m.png','https://mr-tat.github.io/Addition-ecrite-simple/logo-m.png').replaceAll('./logo-mot.webp','https://mr-tat.github.io/Addition-ecrite-simple/logo-mot.webp').replaceAll('./illustration.webp','https://mr-tat.github.io/Addition-ecrite-simple/illustration.webp');
 html=html.replace('<head>','<head>'+scopedBootstrap).replace('</body>',bridge+'</body>');
 // The child frame uses the same origin and isolated storage keys. No public classic game is changed.
-const iframe=document.createElement('iframe');iframe.title='Addition écrite simple V6.0.2';iframe.style.cssText='border:0;width:100%;height:100vh;display:block';iframe.setAttribute('allow','fullscreen');
+const iframe=document.createElement('iframe');iframe.title='Addition écrite simple V6.0.2';iframe.style.cssText='border:0;width:100%;height:calc(100dvh - 44px);display:block';iframe.setAttribute('allow','fullscreen');
 window.MathasPilotBridge={completed:async item=>{
  if(mode!=='connected'||!cloud)return;
  const label=item.label||'',match=label.match(/(?:Niveau|NIV)\s*([123])/i);if(!match)return;
@@ -117,8 +129,19 @@ window.MathasPilotBridge={completed:async item=>{
  console.warn('Connect : résultat non synchronisé, nouvelle tentative requise',item);
 },points:item=>{const m=String(item.score||'').match(/^(\d+)(?:\s*[/]\s*(\d+))?$/);if(!m)return 0;const hard=/HARD/i.test(item.label),sudden=/Mort subite/i.test(item.label),n=Number(m[1]),total=m[2]?Number(m[2]):0;const level=Number((String(item.label).match(/(?:Niveau|NIV)\s*([123])/i)||[])[1]||1);const ml=[1,1.2,1.4,1.6,1.8,2][hard?level+2:level-1],mf=sudden?1.6:total===20?1.6:total===10?1.3:1;let weighted=n;if(sudden){weighted=0;for(let i=0;i<n;i++)weighted+=Math.min(4,Math.pow(1.035,i))}return 5*ml*mf*weighted}};
 iframe.srcdoc=html;
-document.body.replaceChildren(iframe);
-document.body.style.cssText='margin:0;padding:0;background:#071e2a';
+const toolbar=document.createElement('header');
+toolbar.style.cssText='box-sizing:border-box;width:100%;height:44px;padding:0 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#102f46;color:#fff;font:600 13px system-ui;border-bottom:1px solid #286180';
+const statusLabel=document.createElement('span');
+statusLabel.style.cssText='white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+statusLabel.textContent=mode==='connected'?'● Connecté · '+(studentName||'Compte élève'):'○ Classique · sauvegarde locale';
+statusLabel.title=statusLabel.textContent;
+const hubLink=document.createElement('a');
+hubLink.href='https://mr-tat.github.io/Mathas-Connect/hub.html'+(UUID.test(classId)?'?class='+encodeURIComponent(classId):'');
+hubLink.textContent='Retour au HUB';
+hubLink.style.cssText='flex:none;color:#b9ecff;text-decoration:underline;font-size:12px';
+toolbar.append(statusLabel,hubLink);
+document.body.replaceChildren(toolbar,iframe);
+document.body.style.cssText='margin:0;padding:0;background:#071e2a;overflow:hidden';
 const migration=document.createElement('button');migration.type='button';migration.textContent='↩ Récupérer mes anciens records';
 migration.style.cssText='position:fixed;bottom:12px;right:12px;z-index:99999;background:#135d80;color:white;border:2px solid white;border-radius:12px;padding:11px 15px;font:700 14px system-ui;cursor:pointer;box-shadow:0 4px 16px #0008';
 migration.title='Import temporaire depuis Addition écrite simple V6.0.2';migration.onclick=offerImport;
