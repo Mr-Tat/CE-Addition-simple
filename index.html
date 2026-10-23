@@ -143,7 +143,7 @@ toolbar.append(statusLabel,hubLink);
 document.body.replaceChildren(toolbar,iframe);
 document.body.style.cssText='margin:0;padding:0;background:#071e2a;overflow:hidden';
 const migration=document.createElement('button');migration.type='button';migration.textContent='↩ Récupérer mes anciens records';
-migration.style.cssText='position:fixed;bottom:12px;right:12px;z-index:99999;background:#135d80;color:white;border:2px solid white;border-radius:12px;padding:11px 15px;font:700 14px system-ui;cursor:pointer;box-shadow:0 4px 16px #0008';
+migration.style.cssText='flex:none;background:#135d80;color:white;border:1px solid #70bddc;border-radius:7px;padding:5px 9px;font:600 12px system-ui;cursor:pointer';
 migration.title='Import temporaire depuis Addition écrite simple V6.0.2';migration.onclick=offerImport;
-document.body.appendChild(migration);
+const identityGroup=document.createElement('div');identityGroup.style.cssText='display:flex;align-items:center;gap:9px;min-width:0';identityGroup.append(statusLabel,migration);toolbar.replaceChild(identityGroup,statusLabel);
 </script></body></html>
