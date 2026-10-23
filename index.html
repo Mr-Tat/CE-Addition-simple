@@ -40,7 +40,7 @@ const bridge=`<script>
 (function(){
  const pilot=window.parent.MathasPilotBridge; if(!pilot)return;
  let original=window.__setLastWork;
- if(typeof original==='function')window.__setLastWork=function(x){original(x);pilot.completed({...x,at:new Date().toISOString()})};
+ if(typeof original==='function')window.__setLastWork=function(x){original(x);setTimeout(()=>pilot.completed({...x,at:new Date().toISOString()}),850)};
 })();
 <\/script>`;
 const scopedBootstrap='<script>(function(){var ns='+JSON.stringify(ns)+';var p=Storage.prototype;var g=p.getItem,s=p.setItem,r=p.removeItem;function key(k){k=String(k);return /^(addition|mathas_)/.test(k)?ns+k:k}p.getItem=function(k){return g.call(this,this===localStorage?key(k):k)};p.setItem=function(k,v){return s.call(this,this===localStorage?key(k):k,v)};p.removeItem=function(k){return r.call(this,this===localStorage?key(k):k)};})();<'+ '/script>';
