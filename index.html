@@ -150,6 +150,55 @@ if(mode==='connected'&&html.includes(masteryAsScore))html=html.replace(masteryAs
 html=html.replace('<head>','<head>'+scopedBootstrap).replace('</body>',bridge+'</body>');
 // The child frame uses the same origin and isolated storage keys. No public classic game is changed.
 const iframe=document.createElement('iframe');iframe.title='Addition écrite simple V6.0.2';iframe.style.cssText='border:0;width:100%;height:calc(100dvh - 44px);display:block';iframe.setAttribute('allow','fullscreen');
+// XP Connect : overlay non bloquant et consultation permanente des jalons.
+let lastXp=null,xpToastTimer=null;
+const threshold=l=>l<7?l*50:300+(l-6)*100;
+const xpCss=document.createElement('style');
+xpCss.textContent=`#xp-toast{position:fixed;z-index:99999;left:50%;bottom:66px;transform:translateX(-50%) translateY(25px);pointer-events:none;opacity:0;transition:opacity .32s,transform .32s;background:#102e44f2;color:white;border:1px solid #bd901d;border-radius:16px;box-shadow:0 10px 34px #0008;padding:15px 22px;width:min(360px,calc(100vw - 45px));box-sizing:border-box;text-align:center;font-family:system-ui}#xp-toast.open{opacity:1;transform:translateX(-50%) translateY(0)}#xp-toast strong{font-size:25px;color:#dbab3d}#xp-progress{height:11px;background:#315365;border-radius:15px;overflow:hidden;margin:10px 0 5px}#xp-progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#bd8b23,#f9d56b);transition:width 1.1s ease}#xp-levelburst{font-size:17px;font-weight:800;color:#ffdf71;animation:xpburst .75s ease-in-out}@keyframes xpburst{0%{transform:scale(.65);opacity:.25}55%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}#xp-details{position:fixed;z-index:99998;top:48px;right:8px;width:min(460px,calc(100vw - 16px));max-height:min(77vh,640px);overflow:auto;background:#10283a;color:#ecfaff;border:1px solid #79a8bb;padding:16px;border-radius:13px;box-shadow:0 12px 38px #0009;font:13px system-ui}#xp-details[hidden]{display:none}#xp-details table{width:100%;border-collapse:collapse}#xp-details td{border-bottom:1px solid #315469;padding:5px}#xp-details td:last-child{text-align:right}#xp-details button{cursor:pointer}#xp-toolbar-button{background:#765618;color:#fff0ca;border:1px solid #d2aa4a;border-radius:7px;padding:5px 9px;font:600 12px system-ui;cursor:pointer}@media(prefers-reduced-motion:reduce){#xp-toast,#xp-progress>i,#xp-levelburst{transition:none!important;animation:none!important}}`;
+document.head.append(xpCss);
+function xpElement(){let el=document.getElementById('xp-toast');if(!el){el=document.createElement('div');el.id='xp-toast';el.setAttribute('aria-live','polite');document.body.append(el)}return el}
+function toastXp(xp){
+ if(!xp||xp.delta<=0)return;
+ const el=xpElement();clearTimeout(xpToastTimer);
+ const from=xp.total-xp.delta,to=xp.total,prior=from<300?1+Math.floor(from/50):7+Math.floor((from-300)/100);
+ const lvl=xp.level||prior;
+ el.replaceChildren();
+ const label=document.createElement('strong');label.textContent='+'+xp.delta+' XP';
+ const caption=document.createElement('div');caption.textContent='Progression Connect · '+to+' XP';
+ const bar=document.createElement('div');bar.id='xp-progress';const fill=document.createElement('i');bar.append(fill);
+ el.append(label,caption,bar);
+ if(lvl>prior){const burst=document.createElement('div');burst.id='xp-levelburst';burst.textContent='✦ Niveau '+lvl+' atteint ! ✦';el.append(burst)}
+ el.classList.add('open');
+ const start=threshold(prior-1),end=threshold(prior);
+ fill.style.width=Math.max(0,Math.min(100,100*(from-start)/(end-start)))+'%';
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{fill.style.width='100%';if(lvl===prior){const base=threshold(lvl-1),next=threshold(lvl);fill.style.width=Math.max(0,Math.min(100,100*(to-base)/(next-base)))+'%';}}));
+ xpToastTimer=setTimeout(()=>el.classList.remove('open'),lvl>prior?4500:3100);
+}
+const xpRows=()=>{const rows=[];for(let l=1;l<=3;l++){
+ for(const [size,key,pts] of [[4,'perfect',22],[10,'pass',30],[10,'bonus',6],[20,'pass',50],[20,'bonus',10]])rows.push({key:'classic:'+l+':'+size+':'+key,label:'Classique N'+l+' · '+size+' calculs '+(key==='bonus'?'sans-faute':key==='perfect'?'4/4':'≥80 %'),pts});
+ for(const n of [5,10])rows.push({key:'sudden:'+l+':'+n,label:'Mort subite N'+l+' · '+n+' réussites',pts:10});
+ for(const n of [3,7])rows.push({key:'hard:'+l+':'+n,label:'HARD N'+l+' · '+n+' réussites',pts:10});
+}return rows};
+async function loadXp(){
+ if(mode!=='connected'||!cloud)return null;
+ const auth=(await cloud.auth.getSession()).data.session;if(!auth)return null;
+ const res=await fetch(URL+'/functions/v1/connect-results',{method:'POST',headers:{apikey:KEY,authorization:'Bearer '+auth.access_token,'content-type':'application/json'},body:JSON.stringify({action:'student-xp',classId,appKey:APP})});
+ const data=await res.json();if(res.ok&&data.ok){lastXp=data;return data}return null;
+}
+async function toggleXpDetails(){
+ let panel=document.getElementById('xp-details');
+ if(panel&&!panel.hidden){panel.hidden=true;return}
+ if(!panel){panel=document.createElement('aside');panel.id='xp-details';document.body.append(panel)}
+ panel.hidden=false;panel.textContent='Chargement des XP…';
+ try{const data=await loadXp();if(!data){panel.textContent='XP indisponibles hors connexion.';return}
+ const head=document.createElement('div');head.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px';
+ const title=document.createElement('strong');title.textContent='Mes XP : '+data.appXp+'/474 · Connect N'+data.level+' ('+data.total+' XP)';
+ const close=document.createElement('button');close.textContent='Fermer';close.onclick=()=>panel.hidden=true;head.append(title,close);
+ const table=document.createElement('table'),owned=new Set(data.milestones);
+ for(const entry of xpRows()){const tr=document.createElement('tr'),name=document.createElement('td'),points=document.createElement('td');name.textContent=(owned.has(entry.key)?'✓ ':'○ ')+entry.label;points.textContent=(owned.has(entry.key)?'Acquis · ':'+')+entry.pts+' XP';tr.append(name,points);table.append(tr)}
+ panel.replaceChildren(head,table)
+ }catch{panel.textContent='Impossible de charger les XP pour le moment.'}
+}
 const queueKey='ce-addition.pending.'+(session?.user?.id||'free')+'.v1';
 const readQueue=()=>{try{const a=JSON.parse(localStorage.getItem(queueKey)||'[]');return Array.isArray(a)?a:[]}catch{return []}};
 const saveQueue=q=>{if(q.length>1000)throw Error('File de synchronisation saturée : ne pas terminer de nouvelles parties avant reconnexion.');localStorage.setItem(queueKey,JSON.stringify(q))};
@@ -169,7 +218,7 @@ async function drain(){
    const headers={apikey:KEY,authorization:'Bearer '+a.access_token,'content-type':'application/json'};
    let res,data;
    try{res=await fetch(URL+'/functions/v1/connect-results',{method:'POST',headers,body:JSON.stringify(e)});data=await res.json()}catch{break}
-   if(res.ok&&data.ok){revision=data.revision;resetEpoch=data.resetEpoch??resetEpoch;q.shift();saveQueue(q);conflicts=0;continue}
+   if(res.ok&&data.ok){revision=data.revision;resetEpoch=data.resetEpoch??resetEpoch;q.shift();saveQueue(q);conflicts=0;if(data.xp?.delta>0)toastXp(data.xp);continue}
    if(data.error==='stale_reset_epoch'){q.shift();saveQueue(q);break}
    if(data.error==='revision_conflict'&&conflicts++<2){
     const v=await fetch(URL+'/functions/v1/connect-results',{method:'POST',headers,body:JSON.stringify({action:'student-load',classId,appKey:APP})}).then(r=>r.json()).catch(()=>null);
@@ -242,7 +291,9 @@ const hubLink=document.createElement('a');
 hubLink.href='https://mr-tat.github.io/Mathas-Connect/hub.html'+(UUID.test(classId)?'?class='+encodeURIComponent(classId):'');
 hubLink.textContent='Retour au HUB';
 hubLink.style.cssText='flex:none;color:#b9ecff;text-decoration:underline;font-size:12px';
+const xpButton=document.createElement('button');xpButton.id='xp-toolbar-button';xpButton.type='button';xpButton.textContent='Mes XP';xpButton.onclick=toggleXpDetails;
 toolbar.append(statusLabel,syncText,hubLink);
+if(mode==='connected')toolbar.insertBefore(xpButton,hubLink);
 document.body.replaceChildren(toolbar,iframe);
 document.body.style.cssText='margin:0;padding:0;background:#071e2a;overflow:hidden';
 const migration=document.createElement('button');migration.type='button';migration.textContent='↩ Récupérer mes anciens records';
