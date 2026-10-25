@@ -9,17 +9,17 @@ try{
   const {createClient}=await import('https://esm.sh/@supabase/supabase-js@2.95.0');
   const sb=createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
   session=(await sb.auth.getSession()).data.session;
-  if(session?.user?.is_anonymous){
+  if(session?.user){
    const r=await fetch(URL+'/functions/v1/connect-results',{method:'POST',headers:{apikey:KEY,authorization:'Bearer '+session.access_token,'content-type':'application/json'},body:JSON.stringify({action:'student-load',classId,appKey:APP})});
    const x=await r.json();if(r.ok&&x.ok){
     mode='connected';revision=x.revision;resetEpoch=x.resetEpoch??0;initial=x.state;cloud=sb;
     try{
       const profileResponse=await fetch(URL+'/functions/v1/connect-api',{method:'POST',
         headers:{apikey:KEY,authorization:'Bearer '+session.access_token,'content-type':'application/json'},
-        body:JSON.stringify({action:'student-me',classId})});
+        body:JSON.stringify({action:session.user.is_anonymous?'student-me':'teacher-player',classId})});
       if(profileResponse.ok){
         const profile=await profileResponse.json();
-        if(profile.ok&&profile.status==='approved'&&profile.classId===classId&&typeof profile.displayName==='string')
+        if(profile.ok&&profile.status==='approved'&&(profile.teacherPlayer||profile.classId===classId)&&typeof profile.displayName==='string')
           studentName=profile.displayName.trim().slice(0,70);
       }
     }catch(err){console.info('Nom du compte provisoirement indisponible.')}
