@@ -88,43 +88,6 @@ function currentRewards(){
  try{return JSON.parse(localStorage.getItem('mathas_trophies_v3_addition-simple')||'null')}catch{return null}
 }
 
-// Outil temporaire : récupération explicite des acquis de l'ancienne application.
-async function offerImport(){
- const {legacySnapshot,importToClassic,legacyForCloud}=await import('./legacy-import.js');
- const originalRead=k=>native.get.call(localStorage,k);
- const snap=legacySnapshot(originalRead);
- if(!snap.meaningful){alert('Aucun ancien record détecté sur ce navigateur. Les records de la version classique doivent être présents dans ce même profil Chrome.');return}
- const context=mode==='connected'?'Connecté (élève actuellement autorisé)':'Classique (ce navigateur)';
- if(!confirm('Importer les anciens records de CE Addition V6.0.2 vers '+(mode==='connected'?(studentName||'le compte élève connecté'):'le Mode Classique')+' ?\\n\\nIl faut être dans le même Chrome que les anciens scores. Les anciens records seront conservés.'))return;
- if(mode==='connected'){
-  if(!cloud){alert('Connexion au compte indisponible. Aucun résultat modifié.');return}
-  const imported=legacyForCloud(snap);
-  try{
-   for(let attempt=0;attempt<3;attempt++){
-    const active=(await cloud.auth.getSession()).data.session;
-    if(!active){alert('Session Connecté expirée. Reconnecte-toi depuis le HUB.');return}
-    const headers={apikey:KEY,authorization:'Bearer '+active.access_token,'content-type':'application/json'};
-    const response=await fetch(URL+'/functions/v1/connect-results',{method:'POST',headers,body:JSON.stringify({action:'legacy-import',classId,appKey:APP,expectedRevision:revision,expectedResetEpoch:resetEpoch,legacy:imported})});
-    const result=await response.json();
-    if(response.ok&&result.ok){
-     revision=result.revision;resetEpoch=result.resetEpoch??resetEpoch;initial=result.state;apply(initial);
-     if(initial?.rewards)localStorage.setItem('mathas_trophies_v3_addition-simple',JSON.stringify(initial.rewards));
-     alert('Anciens records récupérés dans le compte Connecté ! Les sauvegardes originales sont conservées.');
-     location.reload();return;
-    }
-    if(result.error==='stale_reset_epoch'){alert('Le compte a été remis à zéro sur un autre appareil. Actualise la page avant tout import.');return}
-    if(result.error!=='revision_conflict'){alert('Import interrompu : '+(result.error||'erreur réseau')+'. Aucun ancien résultat supprimé.');return}
-    const read=await fetch(URL+'/functions/v1/connect-results',{method:'POST',headers,body:JSON.stringify({action:'student-load',classId,appKey:APP})});
-    const refreshed=await read.json();if(!read.ok||!refreshed.ok)break;
-    revision=refreshed.revision;resetEpoch=refreshed.resetEpoch??0;
-   }
-   alert('Import non terminé à cause de mises à jour concurrentes. Réessaie plus tard.');
-  }catch(err){alert('Connexion interrompue : aucun ancien résultat supprimé. Réessaie après reconnexion.')}
-  return;
- }
- importToClassic(snap,k=>localStorage.getItem(k),(k,v)=>localStorage.setItem(k,v));
- alert('Records et déblocages récupérés dans le mode Classique. Le jeu va se recharger.');location.reload()
-}
 const bridge=`<script>
 (function(){
  const pilot=window.parent.MathasPilotBridge; if(!pilot)return;
@@ -285,7 +248,7 @@ toolbar.style.cssText='box-sizing:border-box;width:100%;height:44px;padding:0 14
 const syncText=document.createElement('span');syncText.id='ce-sync';syncText.style.cssText='font:500 11px system-ui;color:#c0e6ec';
 const statusLabel=document.createElement('span');
 statusLabel.style.cssText='white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
-statusLabel.textContent=mode==='connected'?'● Connecté · '+(studentName||'Compte élève'):'○ Classique · sauvegarde locale';
+statusLabel.textContent=mode==='connected'?'● Connecté · '+(studentName||'Compte élève')+(initial?'':' · Nouvelle progression Connect'):'○ Classique · sauvegarde locale';
 statusLabel.title=statusLabel.textContent;
 const hubLink=document.createElement('a');
 hubLink.href='https://mr-tat.github.io/Mathas-Connect/hub.html'+(UUID.test(classId)?'?class='+encodeURIComponent(classId):'');
@@ -296,9 +259,6 @@ toolbar.append(statusLabel,syncText,hubLink);
 if(mode==='connected')toolbar.insertBefore(xpButton,hubLink);
 document.body.replaceChildren(toolbar,iframe);
 document.body.style.cssText='margin:0;padding:0;background:#071e2a;overflow:hidden';
-const migration=document.createElement('button');migration.type='button';migration.textContent='↩ Récupérer mes anciens records';
-migration.style.cssText='flex:none;background:#135d80;color:white;border:1px solid #70bddc;border-radius:7px;padding:5px 9px;font:600 12px system-ui;cursor:pointer';
-migration.title='Import temporaire depuis Addition écrite simple V6.0.2';migration.onclick=offerImport;
-const identityGroup=document.createElement('div');identityGroup.style.cssText='display:flex;align-items:center;gap:9px;min-width:0';identityGroup.append(statusLabel,migration);toolbar.replaceChild(identityGroup,statusLabel);showSync();if(mode==='connected')drain();
+showSync();if(mode==='connected')drain();
 }
 </script></body></html>
