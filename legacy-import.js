@@ -1,4 +1,5 @@
-// Import transitoire des sauvegardes V6.0.2 — aucune suppression des clés historiques.
+// Fusion locale des scores classiques lors du passage à la nouvelle interface.
+// Ne communique jamais avec Connect/Supabase ; aucune suppression des données historiques.
 const KEYS={
  classic:'addition_classic_v1',sudden:'addition_sudden_v1',hard:'addition1_hard_sudden_v1',
  hardThree:'addition1_hard_three_v1',progress:'mathas_progression_addition_simple_v1',
@@ -69,19 +70,4 @@ export function importToClassic(snapshot,read,write){
  const last=get(KEYS.lastWork),incoming=e.lastWork;
  if(incoming&&(!last||(Date.parse(incoming.at)||0)>(Date.parse(last.at)||0)))set(KEYS.lastWork,incoming);
  return {classic,sudden,hard,hardThree};
-}
-export function legacyForCloud(snapshot){
- const e=snapshot.entries,classic=mergeScores(null,e.classic);
- const normal=levels.map(l=>classic[l]||{});
- const sudden=levels.map(l=>take(object(e.sudden)[l],100000));
- const hard=[1,2,3].map(l=>take(object(e.hard)[l],100000));
- const hardThree=[1,2,3].map(l=>take(object(e.hardThree)[l],5));
- const progress=mergeProgress(null,e.progress);
- const pts=e.points||{};
- const numbers=[...(Array.isArray(pts.bestThree)?pts.bestThree:[]).map(x=>cleanPoints(x?.points)),cleanPoints(pts.bestOne?.points)].filter(x=>x!=null).map(Math.round).sort((a,b)=>b-a).slice(0,3);
- const now=new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Brussels'});
- const today=pts.day===now?Math.max(0,...(Array.isArray(pts.top)?pts.top:[]).map(x=>cleanPoints(x?.points)||0)):null;
- return {classic:normal,sudden,hard,hardThree,progress,topThree:numbers,bestPoints:numbers[0]??null,
-  todayBest:today==null?null:{day:now,points:Math.round(today)},
-  rewards:e.rewards?rewards(e.rewards):null};
 }
