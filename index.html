@@ -1,7 +1,7 @@
 <!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Addition écrite simple · Connect — Pilote</title><style>body{font-family:system-ui;background:#0c2235;color:white;margin:0;padding:25px}#loading{max-width:620px;margin:12vh auto;padding:25px;border:1px solid #628ba7;border-radius:16px}a{color:#8ce7fc}</style></head><body><main id="loading"><h1>Math’as · Addition écrite simple</h1><p id="message">Vérification du mode et chargement de la copie fidèle V6.0.2…</p><p><a href="https://mr-tat.github.io/Mathas-Connect/">Retour au HUB Connect</a></p></main><script type="module">
 const URL='https://awmhpfofacaglewammxt.supabase.co',KEY='sb_publishable_oI2Pyl3kXzmLkK-CBnw9Nw_66a4fZgM',APP='addition-ecrite-simple';
 const query=new URLSearchParams(location.search),classId=query.get('class')||'',UUID=/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i;
-const free=localStorage.getItem('mathas.connect.mode-libre.v1')==='1';let session=null,cloud=null,mode='free',revision=0,resetEpoch=0,initial=null,studentName='';
+const free=localStorage.getItem('mathas.connect.mode-libre.v1')==='1';let session=null,cloud=null,mode='free',revision=0,resetEpoch=0,initial=null,studentName='',importDecision=null;
 const status=s=>document.getElementById('message').textContent=s;
 const original=await fetch('./game-original.html',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('Copie du jeu non disponible');return r.text()});
 try{
@@ -12,7 +12,7 @@ try{
   if(session?.user){
    const r=await fetch(URL+'/functions/v1/connect-results',{method:'POST',headers:{apikey:KEY,authorization:'Bearer '+session.access_token,'content-type':'application/json'},body:JSON.stringify({action:'student-load',classId,appKey:APP})});
    const x=await r.json();if(r.ok&&x.ok){
-    mode='connected';revision=x.revision;resetEpoch=x.resetEpoch??0;initial=x.state;cloud=sb;
+    mode='connected';revision=x.revision;resetEpoch=x.resetEpoch??0;initial=x.state;cloud=sb;importDecision=x.importDecision??(x.state?'progress_exists':null);
     try{
       const profileResponse=await fetch(URL+'/functions/v1/connect-api',{method:'POST',
         headers:{apikey:KEY,authorization:'Bearer '+session.access_token,'content-type':'application/json'},
@@ -242,7 +242,7 @@ window.MathasPilotBridge={mode,reset:resetInCloud,completed:async item=>{
  const awards=currentRewards();if(awards?.version===3)body.rewards=awards;
  const pending=readQueue();pending.push(body);saveQueue(pending);showSync();await drain();
 },points:item=>{const m=String(item.score||'').match(/^(\d+)(?:\s*[/]\s*(\d+))?$/);if(!m)return 0;const hard=/HARD/i.test(item.label),sudden=/Mort subite/i.test(item.label),n=Number(m[1]),total=m[2]?Number(m[2]):0;const level=Number((String(item.label).match(/(?:Niveau|NIV)\s*([123])/i)||[])[1]||1);const ml=[1,1.2,1.4,1.6,1.8,2][hard?level+2:level-1],mf=sudden?1.6:total===20?1.6:total===10?1.3:1;let weighted=n;if(sudden){weighted=0;for(let i=0;i<n;i++)weighted+=Math.min(4,Math.pow(1.035,i))}return 5*ml*mf*weighted}};
-iframe.srcdoc=html;
+if(mode!=='connected'||importDecision!==null)iframe.srcdoc=html;
 const toolbar=document.createElement('header');
 toolbar.style.cssText='box-sizing:border-box;width:100%;height:44px;padding:0 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#102f46;color:#fff;font:600 13px system-ui;border-bottom:1px solid #286180';
 const syncText=document.createElement('span');syncText.id='ce-sync';syncText.style.cssText='font:500 11px system-ui;color:#c0e6ec';
@@ -259,6 +259,45 @@ toolbar.append(statusLabel,syncText,hubLink);
 if(mode==='connected')toolbar.insertBefore(xpButton,hubLink);
 document.body.replaceChildren(toolbar,iframe);
 document.body.style.cssText='margin:0;padding:0;background:#071e2a;overflow:hidden';
+
+if(mode==='connected'&&importDecision===null){
+ const veil=document.createElement('section');veil.style.cssText='position:fixed;z-index:999999;inset:44px 0 0;background:#071e2a;color:white;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;font:15px system-ui';
+ const card=document.createElement('div');card.style.cssText='box-sizing:border-box;width:min(580px,100%);border:1px solid #5597aa;border-radius:16px;background:#102f46;padding:24px';
+ const title=document.createElement('h2');title.textContent='Bienvenue dans Math’as Connect';
+ const info=document.createElement('p');info.textContent='Recherche des anciens résultats de ce navigateur…';
+ const note=document.createElement('p');note.style.cssText='font-size:13px;color:#c0dfed';note.textContent='Récupération unique par application. Les anciens résultats locaux restent intacts. Les records importés ne créent pas de parties récentes.';
+ const actions=document.createElement('div');actions.style.cssText='display:flex;flex-wrap:wrap;gap:10px;margin-top:18px';
+ const mk=label=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.style.cssText='padding:12px 14px;border:1px solid #8dc5d5;background:#126b88;border-radius:9px;color:white;font:600 14px system-ui;cursor:pointer';return b};
+ const imp=mk('Récupérer mes résultats et XP'),skip=mk('Commencer à zéro'),later=mk('Plus tard — retour au HUB');
+ imp.disabled=true;later.onclick=()=>location.assign('https://mr-tat.github.io/Mathas-Connect/hub.html?class='+encodeURIComponent(classId));
+ actions.append(imp,skip,later);card.append(title,info,note,actions);veil.append(card);document.body.append(veil);
+ let old=null;const busy=v=>{for(const b of [imp,skip,later])b.disabled=v};
+ async function choose(skipImport){
+  if(!skipImport&&!old)return;
+  if(!confirm(skipImport?'Commencer sans récupération pour ce jeu ? Ce choix sera définitif.':'Récupérer une seule fois les anciens records et leurs XP ?'))return;
+  busy(true);info.textContent='Enregistrement sécurisé dans Connect…';
+  try{
+   const auth=(await cloud.auth.getSession()).data.session;
+   if(!auth){info.textContent='Session expirée. Reviens au HUB pour te reconnecter.';return}
+   const res=await fetch(URL+'/functions/v1/connect-results',{method:'POST',headers:{apikey:KEY,authorization:'Bearer '+auth.access_token,'content-type':'application/json'},body:JSON.stringify({action:skipImport?'legacy-import-skip':'legacy-import-once',classId,appKey:APP,expectedRevision:revision,expectedResetEpoch:resetEpoch,...(skipImport?{}:{legacy:old})})});
+   const data=await res.json();
+   if(!res.ok||!data.ok){
+    info.textContent=data.error==='import_closed_progress_exists'?'Une progression existe déjà. Recharge pour la consulter.':'Enregistrement non confirmé ('+(data.error||res.status)+'). Tu peux réessayer ou revenir au HUB.';
+    return;
+   }
+   info.textContent='Choix enregistré. Rechargement…';location.reload();
+  }catch{info.textContent='Connexion interrompue. Recharge la page pour vérifier si le serveur a déjà terminé.'}
+  finally{busy(false)}
+ }
+ skip.onclick=()=>choose(true);
+ try{
+  const {legacySnapshot,legacyForCloud}=await import('./legacy-import.js');
+  const snap=legacySnapshot(k=>native.get.call(localStorage,k));
+  if(snap.meaningful){old=legacyForCloud(snap);imp.disabled=false;imp.onclick=()=>choose(false);info.textContent='Anciens résultats trouvés ! Tu peux récupérer les acquis et les XP correspondants.'}
+  else info.textContent='Aucun ancien score compatible ici. Tu peux commencer à zéro ou revenir au navigateur de tes anciens scores.';
+ }catch{info.textContent='Lecture des anciens résultats impossible. Aucune donnée effacée.';skip.disabled=true}
+}
+
 showSync();if(mode==='connected')drain();
 }
 </script></body></html>
