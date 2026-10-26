@@ -38,8 +38,19 @@ if(!free&&UUID.test(classId)&&mode!=='connected'){
  for(const b of [retry,classic])b.style.cssText='padding:12px;border:0;border-radius:10px;background:#176e8d;color:white;font:600 13px system-ui;cursor:pointer';
  actions.append(retry,classic);view.appendChild(actions);
 }else{
-const ns='mathas.ce-addition.'+(mode==='connected'?'connect.'+session.user.id:'libre')+'.v1:',GKEYS=new Set();
+const ns=mode==='connected'?'mathas.ce-addition.connect.'+session.user.id+'.v1:':'',GKEYS=new Set();
 const native={get:Storage.prototype.getItem,set:Storage.prototype.setItem,remove:Storage.prototype.removeItem};
+// Fusion unique des résultats éventuellement enregistrés auparavant par le nouveau mode classique.
+// Les résultats de l'ancien jeu restent intacts ; Connect demeure isolé.
+if(mode==='free'){
+ try{
+  const {legacySnapshot,importToClassic}=await import('./legacy-import.js');
+  const saved='mathas.ce-addition.libre.v1:';
+  const snap=legacySnapshot(k=>Storage.prototype.getItem.call(localStorage,saved+k));
+  if(snap.meaningful)importToClassic(snap,k=>Storage.prototype.getItem.call(localStorage,k),(k,v)=>Storage.prototype.setItem.call(localStorage,k,v));
+ }catch(e){console.warn('Fusion locale classique non disponible',e)}
+}
+
 function key(k){const s=String(k);return /^(addition|mathas_)/.test(s)?ns+s:s}
 Storage.prototype.getItem=function(k){return native.get.call(this,this===localStorage?key(k):k)};
 Storage.prototype.setItem=function(k,v){return native.set.call(this,this===localStorage?key(k):k,v)};
