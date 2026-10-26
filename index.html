@@ -162,7 +162,8 @@ async function toggleXpDetails(){
  panel.replaceChildren(head,table)
  }catch{panel.textContent='Impossible de charger les XP pour le moment.'}
 }
-const queueKey='ce-addition.pending.'+(session?.user?.id||'free')+'.v1';
+// Nouvelle file pour le départ Connect à zéro : ne pas réémettre de résultats tests anciens.
+const queueKey='ce-addition.pending.'+(session?.user?.id||'free')+'.v2';
 const readQueue=()=>{try{const a=JSON.parse(localStorage.getItem(queueKey)||'[]');return Array.isArray(a)?a:[]}catch{return []}};
 const saveQueue=q=>{if(q.length>1000)throw Error('File de synchronisation saturée : ne pas terminer de nouvelles parties avant reconnexion.');localStorage.setItem(queueKey,JSON.stringify(q))};
 let draining=false;
