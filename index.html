@@ -1,39 +1,48 @@
-<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Addition écrite simple · Connect — Pilote</title><style>body{font-family:system-ui;background:#0c2235;color:white;margin:0;padding:25px}#loading{max-width:620px;margin:12vh auto;padding:25px;border:1px solid #628ba7;border-radius:16px}a{color:#8ce7fc}</style></head><body><main id="loading"><h1>Math’as · Addition écrite simple</h1><p id="message">Vérification du mode et chargement de la copie fidèle V6.0.2…</p><p><a href="https://mr-tat.github.io/Mathas-Connect/">Retour au HUB Connect</a></p></main><script type="module">
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Math’as · Addition écrite simple</title><style>body{font-family:system-ui;background:#0c2235;color:white;margin:0;padding:25px}#loading{max-width:620px;margin:12vh auto;padding:25px;border:1px solid #628ba7;border-radius:16px}a{color:#8ce7fc}</style></head><body><main id="loading"><h1>Math’as · Addition écrite simple</h1><p id="message">Chargement du jeu…</p><p><a href="https://mr-tat.github.io/Mathas-Connect/">Retour aux jeux</a></p></main><script type="module">
 const URL='https://awmhpfofacaglewammxt.supabase.co',KEY='sb_publishable_oI2Pyl3kXzmLkK-CBnw9Nw_66a4fZgM',APP='addition-ecrite-simple';
 const query=new URLSearchParams(location.search),classId=query.get('class')||'',UUID=/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i;
-const free=localStorage.getItem('mathas.connect.mode-libre.v1')==='1';let session=null,cloud=null,mode='free',revision=0,resetEpoch=0,initial=null,studentName='';
+const free=localStorage.getItem('mathas.connect.mode-libre.v1')==='1';let session=null,cloud=null,mode='free',revision=0,resetEpoch=0,initial=null,studentName='',connectionCheckRequired=false;
 const status=s=>document.getElementById('message').textContent=s;
 const original=await fetch('./game-original.html',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('Copie du jeu non disponible');return r.text()});
+// Un visiteur sans profil approuvé ouvre directement le jeu classique.
 try{
  if(!free&&UUID.test(classId)){
   const {createClient}=await import('https://esm.sh/@supabase/supabase-js@2.95.0');
   const sb=createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
   session=(await sb.auth.getSession()).data.session;
-  if(session?.user){
+  // Seule une session élève anonyme est candidate à une sauvegarde Connect.
+  // Une session absente, enseignante ou non approuvée joue directement en classique.
+  if(session?.user?.is_anonymous){
+   connectionCheckRequired=true;
    const r=await fetch(URL+'/functions/v1/connect-results',{method:'POST',headers:{apikey:KEY,authorization:'Bearer '+session.access_token,'content-type':'application/json'},body:JSON.stringify({action:'student-load',classId,appKey:APP})});
-   const x=await r.json();if(r.ok&&x.ok){
+   const x=await r.json().catch(()=>({}));
+   if(r.ok&&x.ok){
     mode='connected';revision=x.revision;resetEpoch=x.resetEpoch??0;initial=x.state;cloud=sb;
     try{
       const profileResponse=await fetch(URL+'/functions/v1/connect-api',{method:'POST',
         headers:{apikey:KEY,authorization:'Bearer '+session.access_token,'content-type':'application/json'},
-        body:JSON.stringify({action:session.user.is_anonymous?'student-me':'teacher-player',classId})});
+        body:JSON.stringify({action:'student-me',classId})});
       if(profileResponse.ok){
         const profile=await profileResponse.json();
-        if(profile.ok&&profile.status==='approved'&&(profile.teacherPlayer||profile.classId===classId)&&typeof profile.displayName==='string')
+        if(profile.ok&&profile.status==='approved'&&profile.classId===classId&&typeof profile.displayName==='string')
           studentName=profile.displayName.trim().slice(0,70);
       }
-    }catch(err){console.info('Nom du compte provisoirement indisponible.')}
-  }else status('Accès Connect non autorisé : utilisation locale.');
+    }catch(err){console.info('Nom du compte momentanément indisponible.')}
+   }else if(r.status===403&&['forbidden','not_enrolled','not_registered'].includes(x.error)){
+    // L'utilisateur n'a pas d'accès Connect à cette classe : aucun écran de connexion.
+    connectionCheckRequired=false;
+   }
   }
  }
-}catch(e){status('Connexion indisponible : passage en mode libre.')}
-// Mode Connect demandé : ne pas basculer silencieusement vers un profil local.
-if(!free&&UUID.test(classId)&&mode!=='connected'){
+}catch(e){console.warn('Vérification du profil de jeu indisponible.',e)}
+// Compte élève reconnu mais serveur indisponible : ne jamais enregistrer
+// silencieusement des parties Connect dans les résultats locaux.
+if(connectionCheckRequired&&mode!=='connected'){
  const view=document.getElementById('loading');
- document.getElementById('message').textContent='Impossible de confirmer le compte Connecté. Aucun résultat ne sera enregistré dans Supabase tant que la connexion n’est pas rétablie.';
+ document.getElementById('message').textContent='Impossible de vérifier les sauvegardes du compte. Aucun résultat ne sera perdu : réessaie plus tard ou joue sans synchronisation.';
  const actions=document.createElement('div');actions.style.cssText='display:flex;gap:10px;flex-wrap:wrap;margin-top:20px';
- const retry=document.createElement('button');retry.textContent='Réessayer la connexion';retry.onclick=()=>location.reload();
- const classic=document.createElement('button');classic.textContent='Jouer en Mode Classique (sans synchronisation)';
+ const retry=document.createElement('button');retry.textContent='Réessayer';retry.onclick=()=>location.reload();
+ const classic=document.createElement('button');classic.textContent='Jouer sans synchronisation';
  classic.onclick=()=>{localStorage.setItem('mathas.connect.mode-libre.v1','1');location.reload()};
  for(const b of [retry,classic])b.style.cssText='padding:12px;border:0;border-radius:10px;background:#176e8d;color:white;font:600 13px system-ui;cursor:pointer';
  actions.append(retry,classic);view.appendChild(actions);
@@ -260,15 +269,15 @@ toolbar.style.cssText='box-sizing:border-box;width:100%;height:44px;padding:0 14
 const syncText=document.createElement('span');syncText.id='ce-sync';syncText.style.cssText='font:500 11px system-ui;color:#c0e6ec';
 const statusLabel=document.createElement('span');
 statusLabel.style.cssText='white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
-statusLabel.textContent=mode==='connected'?'● Connecté · '+(studentName||'Compte élève')+(initial?'':' · Nouvelle progression Connect'):'○ Classique · sauvegarde locale';
+statusLabel.textContent='● Connecté · '+(studentName||'Compte élève')+(initial?'':' · Nouvelle progression Connect');
 statusLabel.title=statusLabel.textContent;
 const hubLink=document.createElement('a');
 hubLink.href='https://mr-tat.github.io/Mathas-Connect/hub.html'+(UUID.test(classId)?'?class='+encodeURIComponent(classId):'');
 hubLink.textContent='Retour au HUB';
 hubLink.style.cssText='flex:none;color:#b9ecff;text-decoration:underline;font-size:12px';
 const xpButton=document.createElement('button');xpButton.id='xp-toolbar-button';xpButton.type='button';xpButton.textContent='Mes XP';xpButton.onclick=toggleXpDetails;
-toolbar.append(statusLabel,syncText,hubLink);
-if(mode==='connected')toolbar.insertBefore(xpButton,hubLink);
+if(mode==='connected')toolbar.append(statusLabel,syncText,xpButton,hubLink);
+else toolbar.append(hubLink);
 document.body.replaceChildren(toolbar,iframe);
 document.body.style.cssText='margin:0;padding:0;background:#071e2a;overflow:hidden';
 
