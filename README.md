@@ -1,6 +1,6 @@
 # CE-Addition-simple — pilote Math’as Connect
 
-**État : pilote fonctionnel, corrections de fiabilité V1 intégrées le 23 octobre 2026.**
+**État : V7.0.1 — pilote Connect et optimisations de fluidité.**
 
 ## Liens
 - Jeu Connect : https://mr-tat.github.io/CE-Addition-simple/
@@ -43,6 +43,8 @@ Les images `logo-m.png`, `logo-mot.webp`, `illustration.webp` sont désormais co
 - Pour les nouveaux jeux, discuter le nom du repository et ses règles de résultats avant l'adaptation.
 
 ## Optimisation prudente du moteur — 28 octobre 2026
+
+Version affichée et déclarée : **V7.0.1**. Les références à V6.0.2 ci-dessus décrivent la provenance historique du moteur et des données, et non la version actuelle.
 - Les vérifications répétitives des records, points, trophées, Mort subite et résumé sont suspendues lorsque l'onglet est en arrière-plan. Les surveillances utiles reprennent lorsque le jeu redevient visible, sans modification des calculs ni du guidage.
 - Les coordonnées des bulles et flèches, les observateurs de géométrie et les mécanismes de réglette/clavier restent **inchangés**.
 - `node --test tests/performance-regression.test.mjs` vérifie les images locales, les scripts et les points d'accroche essentiels.
