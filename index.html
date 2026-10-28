@@ -15,19 +15,19 @@ try{
   // Une session absente, enseignante ou non approuvée joue directement en classique.
   if(session?.user&&(teacherPlayer?!session.user.is_anonymous:session.user.is_anonymous)){
    connectionCheckRequired=true;
-   const r=await fetch(URL+'/functions/v1/connect-results',{method:'POST',headers:{apikey:KEY,authorization:'Bearer '+session.access_token,'content-type':'application/json'},body:JSON.stringify({action:'student-load',classId,appKey:APP})});
+   // Les deux contrôles authentifiés s'effectuent en parallèle, sans les fusionner :
+   // le chargement d'état reste l'unique autorité pour activer le mode Connect.
+   const headers={apikey:KEY,authorization:'Bearer '+session.access_token,'content-type':'application/json'};
+   const statePromise=fetch(URL+'/functions/v1/connect-results',{method:'POST',headers,body:JSON.stringify({action:'student-load',classId,appKey:APP})});
+   const profilePromise=fetch(URL+'/functions/v1/connect-api',{method:'POST',headers,body:JSON.stringify({action:teacherPlayer?'teacher-player':'student-me',classId})}).then(async response=>response.ok?response.json():null).catch(()=>null);
+   const r=await statePromise;
    const x=await r.json().catch(()=>({}));
    if(r.ok&&x.ok){
     mode='connected';revision=x.revision;resetEpoch=x.resetEpoch??0;initial=x.state;cloud=sb;
     try{
-      const profileResponse=await fetch(URL+'/functions/v1/connect-api',{method:'POST',
-        headers:{apikey:KEY,authorization:'Bearer '+session.access_token,'content-type':'application/json'},
-        body:JSON.stringify({action:teacherPlayer?'teacher-player':'student-me',classId})});
-      if(profileResponse.ok){
-        const profile=await profileResponse.json();
-        if(profile.ok&&profile.status==='approved'&&profile.classId===classId&&typeof profile.displayName==='string')
-          studentName=profile.displayName.trim().slice(0,70);
-      }
+      const profile=await profilePromise;
+      if(profile?.ok&&profile.status==='approved'&&profile.classId===classId&&typeof profile.displayName==='string')
+        studentName=profile.displayName.trim().slice(0,70);
     }catch(err){console.info('Nom du compte momentanément indisponible.')}
    }else if(r.status===403&&['forbidden','not_enrolled','not_registered'].includes(x.error)){
     // L'utilisateur n'a pas d'accès Connect à cette classe : aucun écran de connexion.
