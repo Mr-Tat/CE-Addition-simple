@@ -227,40 +227,6 @@ async function drain(){
 }
 window.addEventListener('online',drain);
 window.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')drain()});
-async function resetInCloud(kind){
- if(mode!=='connected'||!cloud)return;
- const label=kind==='restart'?'Remettre à zéro les séries et les déblocages ? Les records Mort subite sont conservés.':'Effacer les scores, records et trophées ? La progression et les déblocages sont conservés.';
- if(!window.confirm(label+'\\n\\nLa remise à zéro s’appliquera aussi aux autres appareils de cet élève.'))return;
- const queued=readQueue();
- if(queued.length&&!window.confirm('Des résultats ne sont pas encore synchronisés. Les abandonner pour poursuivre la remise à zéro ?'))return;
- try{
-  for(let attempts=0;attempts<3;attempts++){
-   const a=(await cloud.auth.getSession()).data.session;
-   if(!a){alert('Compte Connecté introuvable. Aucune donnée effacée.');return}
-   const headers={apikey:KEY,authorization:'Bearer '+a.access_token,'content-type':'application/json'};
-   const res=await fetch(URL+'/functions/v1/connect-results',{method:'POST',headers,body:JSON.stringify({action:'game-reset',classId,appKey:APP,resetType:kind,expectedRevision:revision,expectedResetEpoch:resetEpoch})});
-   const data=await res.json();
-   if(res.ok&&data.ok){
-     revision=data.revision;resetEpoch=data.resetEpoch;initial=data.state;saveQueue([]);
-     clearConnectedScoreCache();apply(initial);
-     if(initial?.rewards)localStorage.setItem('mathas_trophies_v3_addition-simple',JSON.stringify(initial.rewards));
-     localStorage.removeItem('addition1_last_work');
-     localStorage.removeItem('mathas_recent_two_scores_v1_addition-simple');
-     localStorage.removeItem('mathas_scores_/addition-ecrite-simple/');
-     if(kind==='erase-results'){
-       for(const key of ['mathas_trophies_v3_addition-simple','mathas_trophies_v2_addition-simple','mathas_trophies_v1_addition-simple','mathas_easy_trophies_v1_addition-simple'])localStorage.removeItem(key);
-     }
-     alert('Remise à zéro enregistrée dans Connect. Le jeu va se recharger.');
-     location.reload();return;
-   }
-   if(data.error==='stale_reset_epoch'){alert('Le compte a déjà été remis à zéro ailleurs. Actualise le jeu pour retrouver les données à jour.');return}
-   if(data.error!=='revision_conflict'){alert('Aucune remise à zéro effectuée : '+(data.error||'erreur serveur'));return}
-   const current=await fetch(URL+'/functions/v1/connect-results',{method:'POST',headers,body:JSON.stringify({action:'student-load',classId,appKey:APP})}).then(r=>r.json());
-   if(!current.ok){alert('Impossible de relire les scores.');return}
-   revision=current.revision;resetEpoch=current.resetEpoch??0;
-  }
- }catch{alert('Connexion interrompue : aucune confirmation de remise à zéro. Rouvre le jeu pour vérifier les données.')}
-}
 window.MathasPilotBridge={mode,openTeacherParcours:()=>{
  window.open('https://mr-tat.github.io/Mathas-Connect/index.html?portail=prof&profClass='+encodeURIComponent(classId),'_blank','noopener');
 },completed:async item=>{
