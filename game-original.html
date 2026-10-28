@@ -7171,6 +7171,10 @@ function hardThreeScore(level){
     if(!ok)return;
     try{
       [...MASTER_RESET_KEYS,'addition_sudden_v1','addition1_hard_sudden_v1','mathas_trophies_v3_addition-simple','mathas_trophies_v2_addition-simple','mathas_trophies_v1_addition-simple','mathas_easy_trophies_v1_addition-simple','mathas_recent_two_scores_v1_addition-simple','addition1_last_work'].forEach(k=>localStorage.removeItem(k));
+      // Anciennes copies locales : éviter qu'une importation au rechargement
+      // ne restaure les scores que le professeur vient volontairement d'effacer.
+      for(const key of ['addition_classic_v1','addition_sudden_v1','addition1_hard_sudden_v1','addition1_hard_three_v1','mathas_progression_addition_simple_v1','mathas_points_v1_addition-simple','mathas_trophies_v3_addition-simple','addition1_last_work'])
+        localStorage.removeItem('mathas.ce-addition.libre.v1:'+key);
       localStorage.removeItem('mathas_points_v1_'+String(window.MathasAppConfig.appId).replace(/[^\w-]/g,'_'));
       // Historique générique de résultats : il appartient aux scores de séries remis à zéro.
       localStorage.removeItem('mathas_scores_'+window.location.pathname.toLowerCase());
