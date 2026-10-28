@@ -139,7 +139,7 @@ let html=original.replaceAll('./logo-m.png','https://mr-tat.github.io/CE-Additio
 if(mode==='connected'&&html.includes(masteryAsScore))html=html.replace(masteryAsScore,'/* Connect : trophée conservé, record classique non rétabli */');
 html=html.replace('<head>','<head>'+scopedBootstrap).replace('</body>',bridge+'</body>');
 // The child frame uses the same origin and isolated storage keys. No public classic game is changed.
-const iframe=document.createElement('iframe');iframe.title='Addition écrite simple V6.0.2';iframe.style.cssText='border:0;width:100%;height:calc(100dvh - var(--ce-toolbar-height,46px));display:block';iframe.setAttribute('allow','fullscreen');
+const iframe=document.createElement('iframe');iframe.title='Addition écrite simple V7.0.1';iframe.style.cssText='border:0;width:100%;height:calc(100dvh - var(--ce-toolbar-height,46px));display:block';iframe.setAttribute('allow','fullscreen');
 // XP Connect : overlay non bloquant et consultation permanente des jalons.
 let lastXp=null,xpUiVersion=0,xpVisualQueue=Promise.resolve(),xpVisualPending=0;
 function showEarnedXp(value){
