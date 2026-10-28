@@ -262,7 +262,7 @@ async function resetInCloud(kind){
  }catch{alert('Connexion interrompue : aucune confirmation de remise à zéro. Rouvre le jeu pour vérifier les données.')}
 }
 window.MathasPilotBridge={mode,openTeacherParcours:()=>{
- window.open('https://mr-tat.github.io/Mathas-Connect/index.html?portail=prof','_blank','noopener');
+ window.open('https://mr-tat.github.io/Mathas-Connect/index.html?portail=prof&profClass='+encodeURIComponent(classId),'_blank','noopener');
 },completed:async item=>{
  if(mode!=='connected'||!cloud)return;
  const label=item.label||'',match=label.match(/(?:Niveau|NIV)\s*([123])/i);if(!match)return;
