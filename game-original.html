@@ -4822,14 +4822,14 @@ body.light-mode #hardMenuScreen .hard-welcome-v6 strong {color:#9d3046;}
 </div>
 <div class="master-mode-row" hidden="" id="masterModeActiveRow">
 <button class="master-mode-action master-off" id="masterModeDisable" type="button">Désactiver le Master mode</button>
-<button class="master-mode-action master-reset" id="masterModeReset" type="button">Remise à zéro</button>
+<button class="master-mode-action master-reset" id="masterModeReset" type="button">Remettre le jeu à zéro</button>
 </div>
 <div class="master-aids-settings" hidden="" id="masterAidSettings">
 <div class="master-aids-title">Aides autorisées</div>
 <label class="master-aid-option"><span>Réglette</span><span class="master-aid-control"><input checked="" data-master-aid="ruler" type="checkbox"/><span class="master-aid-switch" aria-hidden="true"></span></span></label>
 <div class="master-aids-note">Les indices restent toujours disponibles.</div>
 </div>
-<div class="master-mode-reset-note" hidden="" id="masterModeResetNote">La remise à zéro efface les scores des séries et les déblocages. Les records de Mort subite sont conservés.</div>
+<div class="master-mode-reset-note" hidden="" id="masterModeResetNote">Remet le jeu classique à zéro : scores, records, trophées et déblocages. Les réglages de confort sont conservés.</div>
 <div class="master-mode-status" id="masterModeStatus"></div>
 </div>
 <script>window.MathasAppConfig={"appId":"addition-simple","title":"Addition","family":"addition","visibleVersion":"V6.0.2","assets":{"favicon":"./logo-m.png","wordmark":"./logo-mot.webp"},"storage":{"normal":{"classic":"addition_classic_v1","sudden":"addition_sudden_v1","settings":"addition_settings_v1","rulerUsage":"addition_ruler_usage_v1"},"theme":"addition1_theme_mode_v1","hardRecords":"addition1_hard_sudden_v1","hardThree":"addition1_hard_three_v1","lastWork":"addition1_last_work","progression":"mathas_progression_addition_simple_v1","aids":"mathas_aids_addition_simple_v1","masterReset":["addition_classic_v1","addition1_last_work","mathas_progression_addition_simple_v1","addition1_hard_three_v1","addition_ruler_usage_v1","mathas_recent_two_scores_v1_addition-simple"]},"aids":{"defaults":{"ruler":true},"controls":{"ruler":{"button":"scoreRulerBtn","panel":"scoreRuler"}}},"hard":{"type":"addition","title":"Addition simple","levels":[{"level":1,"digits":10,"addends":2},{"level":2,"digits":12,"addends":2},{"level":3,"digits":16,"addends":2}],"hardSelects":["trainingMaxDigits"]},"layers":{"L2":"#menuScreen.menu-panel, #menuScreen .mathas-menu-zone, #gameScreen > .card","L3":".calc-box, .mode-card, .settings-box, .method-card, .choice-card, .level-wrap, .numpad, .hard-numpad, .instruction, .session-bar","L4":"button, input, select, .digit, .digit-cell, .operator, .answer-input, .carry-input, .side-carry-input"}};
@@ -7166,11 +7166,11 @@ function hardThreeScore(level){
   function resetToZero(){
     if(!window.__masterMode)return;
     const ok=window.confirm(
-      'Remise à zéro ?\n\nLes scores des séries et tous les déblocages seront effacés.\nLes records de Mort subite seront conservés.'
+      'Remettre cette application à zéro ?\n\nTous les scores, records, trophées et déblocages seront supprimés localement.\n\nLes réglages de confort seront conservés. Cette action est irréversible.'
     );
     if(!ok)return;
     try{
-      MASTER_RESET_KEYS.forEach(k=>localStorage.removeItem(k));
+      [...MASTER_RESET_KEYS,'addition_sudden_v1','addition1_hard_sudden_v1','mathas_trophies_v3_addition-simple','mathas_trophies_v2_addition-simple','mathas_trophies_v1_addition-simple','mathas_easy_trophies_v1_addition-simple','mathas_recent_two_scores_v1_addition-simple','addition1_last_work'].forEach(k=>localStorage.removeItem(k));
       localStorage.removeItem('mathas_points_v1_'+String(window.MathasAppConfig.appId).replace(/[^\w-]/g,'_'));
       // Historique générique de résultats : il appartient aux scores de séries remis à zéro.
       localStorage.removeItem('mathas_scores_'+window.location.pathname.toLowerCase());
@@ -7179,7 +7179,7 @@ function hardThreeScore(level){
     try{sessionStorage.removeItem(MASTER_SESSION_KEY)}catch{}
     if(status){
       status.classList.remove('bad');
-      status.textContent='Remise à zéro effectuée. Les records de Mort subite sont conservés.';
+      status.textContent='Jeu remis à zéro : scores, records et trophées effacés.';
     }
     setTimeout(()=>window.location.reload(),280)
   }
@@ -10680,7 +10680,6 @@ if(masterRow&&!document.getElementById('masterGamificationSettings')){
   document.getElementById('masterModeDisable')?.addEventListener('click',()=>setTimeout(syncMasterFeaturePanel,0));
   syncMasterFeaturePanel();
 }
-const row=document.getElementById('masterModeActiveRow');if(row&&!document.getElementById('masterModeEraseResults')){const btn=document.createElement('button');btn.type='button';btn.id='masterModeEraseResults';btn.className='master-mode-action master-reset';btn.textContent='Effacer les résultats';btn.title='Efface les points, records et trophées, sans réinitialiser les niveaux débloqués';row.appendChild(btn);btn.addEventListener('click',()=>{if(window.__masterMode!==true)return;if(!window.confirm('Effacer les résultats de cette application ?\n\nTous les points, les tops du jour, les records absolus, les trophées et les anciens meilleurs scores (y compris Mort subite) seront effacés.\n\nLa progression et les déblocages HARD resteront conservés.'))return;const keys=[KEY,TROPHY_KEY,PREVIOUS_TROPHY_KEY,LEGACY_TROPHY_KEY,EASY_TROPHY_KEY,LAST,'mathas_recent_two_scores_v1_'+appId,'mathas_scores_'+window.location.pathname.toLowerCase(),cfg.storage?.normal?.classic,cfg.storage?.normal?.sudden,cfg.storage?.normal?.rulerUsage,cfg.storage?.normal?.tablesUsage,cfg.storage?.hardRecords,cfg.storage?.hardAidUsage];keys.filter(Boolean).forEach(k=>{try{localStorage.removeItem(k)}catch{}});seen='';render();const status=document.getElementById('masterModeStatus');if(status)status.textContent='Résultats et trophées effacés. Déblocages conservés.';setTimeout(()=>window.location.reload(),420)})}
 function liveSpec(hard){const scoreEl=hard?document.querySelector('#hardSessionScore,#hardScore'):document.querySelector('#sessionScore,#scorePill');const levelEl=hard?document.querySelector('#hardSessionTitle,#hardTitle,#hardMeta'):document.querySelector('#sessionLevel,#levelPill');const modeEl=hard?document.querySelector('#hardSessionMeta,#hardMeta,#hardTitle'):document.querySelector('#sessionMode');if(!scoreEl)return null;const scoreStr=scoreEl.textContent||'',lvlStr=(levelEl?.textContent||'')+' '+(modeEl?.textContent||'');const m=scoreStr.match(/(?:Score\s*:?\s*)(\d+)(?:\s*\/\s*(\d+))?/i);if(!m)return null;let level=Number((lvlStr.match(/(?:Niveau|NIV|HARD)\s*(\d+)/i)||[])[1]||0);if(!level){const sel=document.querySelector('#levelSelect,#trainingLevel');level=Number(sel?.value)||1}if(level<1||level>3)return null;const sudden=/mort subite|💀|⚡/i.test(lvlStr)||(!m[2]&&!/5 calculs/i.test(lvlStr));const count=m[2]?Number(m[2]):null;const five=hard&&!sudden&&count===5;if(!sudden&&!five&&![4,10,20].includes(count))return null;return {label:`${hard?'HARD NIV':'Niveau'} ${level} · ${sudden?'Mort subite':five?'5 calculs':'Calculs'}`,score:`${m[1]}${count?'/'+count:''}`,at:new Date().toISOString(),allTables:getAllTables(hard)}}
 function getAllTables(hard){if(cfg.family!=='multiplication')return false;if(hard)return true;const b=document.querySelector('#multPicker [data-mult="all"],#multiplierPicker [data-mult="all"]');return !!b?.classList.contains('active')}
 function syncLive(){if(!scoresOn()){document.querySelectorAll('.mathas-points-live').forEach(el=>el.remove());return}for(const [screenId,hard,barSelector] of [['gameScreen',false,'.session-bar'],['hardGame',true,'.hard-session-bar,.hard-bar']]){const screen=document.getElementById(screenId);if(!screen||screen.classList.contains('hidden'))continue;const mode=(hard?document.querySelector('#hardSessionMeta,#hardMeta'):document.querySelector('#sessionMode'))?.textContent||'';if(/entraînement|exercice guidé|sans points/i.test(mode))continue;const bar=screen.querySelector(barSelector);if(!bar)continue;let live=bar.querySelector('.mathas-points-live');if(!live){live=document.createElement('span');live.className='mathas-points-live';live.setAttribute('aria-label','Points de jeu');bar.appendChild(live)}const spec=liveSpec(hard),result=spec?parse(spec):null;live.textContent=result?`★ ${fmt(result.points)} pts`:''}}
