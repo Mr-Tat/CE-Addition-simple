@@ -5325,7 +5325,44 @@ function enregistrerResultatMathas(score, total, niveau, niveauRang) {
     const previous=mathasPreviousFilledEntry(active);
     if(previous)mathasClearAndFocus(previous)
   }
+  // Navigation spatiale réutilisable pour les calculs écrits : aucune donnée modifiée.
+  function mathasArrowTarget(current, key, candidates){
+    if(!current||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(key))return null;
+    const box=current.getBoundingClientRect();
+    if(!box.width||!box.height)return null;
+    const x=box.left+box.width/2,y=box.top+box.height/2;
+    let best=null,bestScore=Infinity;
+    for(const element of candidates){
+      if(element===current||element.disabled)continue;
+      const rect=element.getBoundingClientRect();
+      if(!rect.width||!rect.height)continue;
+      const dx=rect.left+rect.width/2-x,dy=rect.top+rect.height/2-y;
+      const horizontal=key==='ArrowLeft'||key==='ArrowRight';
+      const forward=key==='ArrowLeft'?dx< -2:key==='ArrowRight'?dx>2:key==='ArrowUp'?dy< -2:dy>2;
+      if(!forward)continue;
+      const primary=horizontal?Math.abs(dx):Math.abs(dy),perpendicular=horizontal?Math.abs(dy):Math.abs(dx);
+      // Rester sur la même ligne (← →) ou la même colonne (↑ ↓).
+      if(perpendicular>(horizontal?Math.max(box.height,rect.height)*0.65:Math.max(box.width,rect.width)*0.65))continue;
+      const score=primary+perpendicular*4;
+      if(score<bestScore){bestScore=score;best=element}
+    }
+    return best;
+  }
+  window.mathasArrowTarget=mathasArrowTarget;
+  function mathasMoveArrow(e){
+    if(!/^Arrow(?:Left|Right|Up|Down)$/.test(e.key)||phase!=='answering')return false;
+    const input=e.target;
+    if(!(input instanceof HTMLInputElement)||!input.matches('.answer-input,.carry-input')||!calculationsPair.contains(input))return false;
+    const box=input.closest('.calc-box');
+    if(!box)return false;
+    const candidates=[...box.querySelectorAll('input.answer-input:not(:disabled),input.carry-input:not(:disabled)')];
+    const next=mathasArrowTarget(input,e.key,candidates);
+    e.preventDefault();
+    if(next)next.focus({preventScroll:true});
+    return true;
+  }
   function onKey(e){
+    if(mathasMoveArrow(e))return;
     if(/^\d$/.test(e.key)){e.preventDefault();active.kind==='carry'?setCarryDigit(active.calc,active.col,e.key):setAnswerDigit(active.calc,active.col,e.key);return}
     if(e.key==='Backspace'||e.key==='Delete'){e.preventDefault();eraseActive();return}
     if(e.key==='Enter'){e.preventDefault();handlePrimary()}
@@ -6529,6 +6566,15 @@ function hardThreeScore(level){
 
   document.addEventListener('keydown',e=>{
     if(hardGame.classList.contains('hidden'))return;
+    if(/^Arrow(?:Left|Right|Up|Down)$/.test(e.key)&&hardPhase==='answering'&&
+       e.target instanceof HTMLInputElement&&op.contains(e.target)&&
+       e.target.matches('input[data-kind]')){
+      const items=[...op.querySelectorAll('input[data-kind]:not(:disabled)')];
+      const next=(window.mathasArrowTarget||mathasArrowTarget)(e.target,e.key,items);
+      e.preventDefault();
+      if(next)next.focus({preventScroll:true});
+      return;
+    }
     if(/^\d$/.test(e.key)){e.preventDefault();enterDigit(e.key)}
     else if(e.key==='Backspace'||e.key==='Delete'){e.preventDefault();backspace()}
     else if(e.key==='Enter'){e.preventDefault();hardPrimaryAction()}
