@@ -254,7 +254,7 @@ statusLabel.style.cssText='flex:1;min-width:0;white-space:nowrap;overflow:hidden
 statusLabel.textContent='● Connecté · '+(studentName||'Compte élève')+(initial?'':' · Nouvelle progression Connect');
 statusLabel.title=statusLabel.textContent;
 const hubLink=document.createElement('a');
-hubLink.href='https://mr-tat.github.io/Mathas-Connect/hub.html'+(UUID.test(classId)?'?class='+encodeURIComponent(classId):'');
+hubLink.href='https://mr-tat.github.io/Mathas-Connect/hub.html'+(UUID.test(classId)?'?class='+encodeURIComponent(classId)+(teacherPlayer?'&joueur=prof':''):'');
 hubLink.textContent='Retour au HUB';
 hubLink.style.cssText='flex:none;color:#b9ecff;text-decoration:underline;font-size:12px';
 const xpEarned=document.createElement('span');xpEarned.id='xp-earned-total';
