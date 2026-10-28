@@ -182,7 +182,8 @@ async function animateXpGain(xp){
  if(!Number.isFinite(total)||!Number.isFinite(delta)||delta<=0)return;
  const start=Math.max(0,total-delta),startLevel=levelAt(start),endLevel=levelAt(total);
  const finish=()=>{showEarnedXp(appXp);renderXpMeter(total,endLevel,true);bumpXpMeter()};
- if(reducedMotion()||document.hidden){finish();return}
+ if(document.hidden){finish();return}
+ const stillCelebration=reducedMotion();
  renderXpMeter(start,startLevel,true);
  const el=xpElement();
  el.hidden=false;
@@ -197,6 +198,14 @@ async function animateXpGain(xp){
  el.classList.remove('open');
  void el.offsetWidth;
  el.classList.add('open');
+ // Si les animations sont réduites, afficher les XP sans déplacement volant.
+ if(stillCelebration){
+  await pause(1500);
+  el.classList.remove('open');
+  el.hidden=true;
+  finish();
+  return;
+ }
  await pause(830);
  const target=document.getElementById('ce-xp-meter');
  if(target&&el.animate&&!document.hidden){
