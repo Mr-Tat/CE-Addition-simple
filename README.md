@@ -4,7 +4,7 @@
 
 ## Liens
 - Jeu Connect : https://mr-tat.github.io/CE-Addition-simple/
-- Ancien jeu V6.0.2 : https://mr-tat.github.io/Addition-ecrite-simple/
+- Moteur pédagogique V6.0.2 conservé localement dans `game-original.html`.
 - HUB : https://mr-tat.github.io/Mathas-Connect/
 - Contrat actuel : https://github.com/Mr-Tat/Mathas-Connect/blob/main/docs/CONNECT_V1_ETAT_REEL_2026-10-23.md
 
@@ -34,10 +34,16 @@
 Les **nouvelles** protections de file hors ligne, de resets Master et de records HARD n'ont pas encore été validées par des parcours de navigateur de bout en bout. Utiliser des profils de test pour les remises à zéro : **ne pas effacer Eleve.A**.
 
 ## Dépendance de migration
-Les images `logo-m.png`, `logo-mot.webp`, `illustration.webp` sont actuellement chargées depuis l'ancien dépôt. **Ne pas supprimer ni rendre privé l'ancien repository avant de les rapatrier** ; il sert également aux imports historiques jusqu'à migration de tous les élèves.
+Les images `logo-m.png`, `logo-mot.webp`, `illustration.webp` sont désormais copiées dans ce dépôt et vérifiées **octet pour octet**. L'exécution ne dépend plus de l'ancien site pour les images. L'import local `legacy-import.js` reste disponible afin de préserver les scores existants sur le même navigateur, sans aucun appel réseau à l'ancien dépôt.
 
 ## Lignes rouges
 - Ne jamais modifier `Mr-Tat/Addition-ecrite-simple` lors de la migration.
 - Jamais de fichier de sauvegarde privé avec les noms d'élèves dans GitHub public.
 - Pas de réécriture du jeu pédagogique pour une amélioration de Connect.
 - Pour les nouveaux jeux, discuter le nom du repository et ses règles de résultats avant l'adaptation.
+
+## Optimisation prudente du moteur — 28 octobre 2026
+- Les vérifications répétitives des records, points, trophées, Mort subite et résumé sont suspendues lorsque l'onglet est en arrière-plan. Les surveillances utiles reprennent lorsque le jeu redevient visible, sans modification des calculs ni du guidage.
+- Les coordonnées des bulles et flèches, les observateurs de géométrie et les mécanismes de réglette/clavier restent **inchangés**.
+- `node --test tests/performance-regression.test.mjs` vérifie les images locales, les scripts et les points d'accroche essentiels.
+- Tests navigateur à garder : PC classique/guidé, bulle et flèches, paysage/portrait mobile, HARD, Mort subite, trophées, XP Connect, reprise de parcours.

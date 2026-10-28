@@ -1,0 +1,19 @@
+name: Connect engine safety checks
+on:
+  push:
+    branches: [main, perf/autonomie-et-fluidite]
+    paths: ['index.html', 'game-original.html', 'tests/**', '.github/workflows/engine-safety.yml', '*.webp', '*.png']
+  pull_request:
+    paths: ['index.html', 'game-original.html', 'tests/**', '.github/workflows/engine-safety.yml', '*.webp', '*.png']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: node --test tests/performance-regression.test.mjs
