@@ -4,7 +4,7 @@ const query=new URLSearchParams(location.search),classId=query.get('class')||'',
 const teacherPlayer=query.get('joueur')==='prof';
 const free=!teacherPlayer&&localStorage.getItem('mathas.connect.mode-libre.v1')==='1';let session=null,cloud=null,mode='free',revision=0,resetEpoch=0,initial=null,studentName='',connectionCheckRequired=false;
 const status=s=>document.getElementById('message').textContent=s;
-const original=await fetch('./game-original.html',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('Copie du jeu non disponible');return r.text()});
+const originalPromise=fetch('./game-original.html').then(r=>{if(!r.ok)throw Error('Copie du jeu non disponible');return r.text()});
 // Un visiteur sans profil approuvé ouvre directement le jeu classique.
 try{
  if(!free&&UUID.test(classId)){
@@ -36,6 +36,7 @@ try{
   }
  }
 }catch(e){console.warn('Vérification du profil de jeu indisponible.',e)}
+const original=await originalPromise;
 // Compte élève reconnu mais serveur indisponible : ne jamais enregistrer
 // silencieusement des parties Connect dans les résultats locaux.
 if((connectionCheckRequired||teacherPlayer)&&mode!=='connected'){
