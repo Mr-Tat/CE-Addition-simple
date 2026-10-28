@@ -7696,7 +7696,7 @@ function hardThreeScore(level){
   }
 
   refresh();
-  setInterval(refresh,600);
+  setInterval(()=>{if(!document.hidden)refresh()},600);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
 })();
 </script>
@@ -10595,7 +10595,7 @@ function watchSuddenMilestones(){
   }
 }
 window.MathasCelebrations={celebrate,whenIdle:whenCelebrationsIdle,pulse:milestonePulse,checkMilestones:watchSuddenMilestones,queueSize:()=>celebrateQueue.length+(celebrateActive?1:0)};
-setInterval(watchSuddenMilestones,135);
+setInterval(()=>{if(!document.hidden)watchSuddenMilestones()},135);
 
 function trophyFlags(t){const flags={mastery:{},sudden:{},scoreOne:{},hard:{},unlock:{gold:!!t.unlockedGold}};for(const color of TROPHY_ORDER){const spec=TROPHY_SPEC[color];flags.mastery[color]=masteryDone(t,spec.mastery.level);flags.sudden[color]=t.sudden[spec.sudden.level-1];flags.scoreOne[color]=t.scoreOne[color];for(let level=1;level<=3;level++)flags.hard[`${color}-${level}`]=t.hardAwards[color][level-1]}return flags}
 function updateTrophies(points,obj,trophiesBefore,allowScoreAwards=true){
@@ -10687,7 +10687,7 @@ if(masterRow&&!document.getElementById('masterGamificationSettings')){
 function liveSpec(hard){const scoreEl=hard?document.querySelector('#hardSessionScore,#hardScore'):document.querySelector('#sessionScore,#scorePill');const levelEl=hard?document.querySelector('#hardSessionTitle,#hardTitle,#hardMeta'):document.querySelector('#sessionLevel,#levelPill');const modeEl=hard?document.querySelector('#hardSessionMeta,#hardMeta,#hardTitle'):document.querySelector('#sessionMode');if(!scoreEl)return null;const scoreStr=scoreEl.textContent||'',lvlStr=(levelEl?.textContent||'')+' '+(modeEl?.textContent||'');const m=scoreStr.match(/(?:Score\s*:?\s*)(\d+)(?:\s*\/\s*(\d+))?/i);if(!m)return null;let level=Number((lvlStr.match(/(?:Niveau|NIV|HARD)\s*(\d+)/i)||[])[1]||0);if(!level){const sel=document.querySelector('#levelSelect,#trainingLevel');level=Number(sel?.value)||1}if(level<1||level>3)return null;const sudden=/mort subite|💀|⚡/i.test(lvlStr)||(!m[2]&&!/5 calculs/i.test(lvlStr));const count=m[2]?Number(m[2]):null;const five=hard&&!sudden&&count===5;if(!sudden&&!five&&![4,10,20].includes(count))return null;return {label:`${hard?'HARD NIV':'Niveau'} ${level} · ${sudden?'Mort subite':five?'5 calculs':'Calculs'}`,score:`${m[1]}${count?'/'+count:''}`,at:new Date().toISOString(),allTables:getAllTables(hard)}}
 function getAllTables(hard){if(cfg.family!=='multiplication')return false;if(hard)return true;const b=document.querySelector('#multPicker [data-mult="all"],#multiplierPicker [data-mult="all"]');return !!b?.classList.contains('active')}
 function syncLive(){if(!scoresOn()){document.querySelectorAll('.mathas-points-live').forEach(el=>el.remove());return}for(const [screenId,hard,barSelector] of [['gameScreen',false,'.session-bar'],['hardGame',true,'.hard-session-bar,.hard-bar']]){const screen=document.getElementById(screenId);if(!screen||screen.classList.contains('hidden'))continue;const mode=(hard?document.querySelector('#hardSessionMeta,#hardMeta'):document.querySelector('#sessionMode'))?.textContent||'';if(/entraînement|exercice guidé|sans points/i.test(mode))continue;const bar=screen.querySelector(barSelector);if(!bar)continue;let live=bar.querySelector('.mathas-points-live');if(!live){live=document.createElement('span');live.className='mathas-points-live';live.setAttribute('aria-label','Points de jeu');bar.appendChild(live)}const spec=liveSpec(hard),result=spec?parse(spec):null;live.textContent=result?`★ ${fmt(result.points)} pts`:''}}
-makeUI();render();syncUnlockGold();setInterval(watch,650);document.addEventListener('visibilitychange',()=>{if(!document.hidden)watch()});window.MathasPoints={parse,read,readTrophies,record,render,key:KEY,trophyKey:TROPHY_KEY};window.MathasGamification={read:readFeatures,set:setFeature,key:GAMIFICATION_KEY};
+makeUI();render();syncUnlockGold();setInterval(()=>{if(!document.hidden)watch()},650);document.addEventListener('visibilitychange',()=>{if(!document.hidden)watch()});window.MathasPoints={parse,read,readTrophies,record,render,key:KEY,trophyKey:TROPHY_KEY};window.MathasGamification={read:readFeatures,set:setFeature,key:GAMIFICATION_KEY};
 })();
 </script>
 
@@ -10873,7 +10873,7 @@ makeUI();render();syncUnlockGold();setInterval(watch,650);document.addEventListe
  }
  function start(){
    install();
-   setInterval(()=>{const m=document.getElementById('menuScreen');if(m&&!m.classList.contains('hidden')){if(!m.querySelector('.mode-card.classic > .mathas-v535-summary'))install();render()}},1400);
+   setInterval(()=>{if(document.hidden)return;const m=document.getElementById('menuScreen');if(m&&!m.classList.contains('hidden')){if(!m.querySelector('.mode-card.classic > .mathas-v535-summary'))install();render()}},1400);
    document.addEventListener('visibilitychange',()=>{if(!document.hidden){previous='';render()}});
    window.addEventListener('storage',()=>{previous='';render()});
    window.addEventListener('focus',()=>{previous='';render()});
