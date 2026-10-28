@@ -186,11 +186,13 @@ async function toggleXpDetails(){
  panel.hidden=false;panel.textContent='Chargement des XP…';
  try{const data=await loadXp();if(!data){panel.textContent='XP indisponibles hors connexion.';return}
  const head=document.createElement('div');head.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px';
- const title=document.createElement('strong');title.textContent='XP dans ce jeu : '+data.appXp+'/'+(data.max??474)+' · Connect N'+data.level+' ('+data.total+' XP au total)';
+ const title=document.createElement('strong');title.textContent='XP acquis dans ce jeu : '+data.appXp+' · Connect N'+data.level+' ('+data.total+' XP au total)';
  const close=document.createElement('button');close.textContent='Fermer';close.onclick=()=>panel.hidden=true;head.append(title,close);
- const table=document.createElement('table'),owned=new Set(data.milestones);
+ const table=document.createElement('table'),owned=new Set(data.repeatXp?data.currentMilestones:data.milestones);
  for(const entry of xpRows()){const tr=document.createElement('tr'),name=document.createElement('td'),points=document.createElement('td');name.textContent=(owned.has(entry.key)?'✓ ':'○ ')+entry.label;points.textContent=(owned.has(entry.key)?'Acquis · ':'+')+entry.pts+' XP';tr.append(name,points);table.append(tr)}
- panel.replaceChildren(head,table)
+ const hint=document.createElement('p');hint.style.cssText='font-size:12px;color:#c5e5f4';
+ hint.textContent=data.repeatXp?'Parcours '+data.parcours+' : les récompenses peuvent être regagnées une fois sur ce parcours.':data.parcours>1?'Parcours '+data.parcours+' : XP historiques conservés, mais non regagnables.':'Chaque récompense se gagne une fois.';
+ panel.replaceChildren(head,hint,table)
  }catch{panel.textContent='Impossible de charger les XP pour le moment.'}
 }
 // Nouvelle file pour le départ Connect à zéro : ne pas réémettre de résultats tests anciens.
