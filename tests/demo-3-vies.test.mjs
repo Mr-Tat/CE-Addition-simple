@@ -19,7 +19,8 @@ test('essai 3 vies : prépare le véritable moteur sans changer le jeu connecté
  assert.match(preview,/#startThreeLives\{/);
  assert.match(preview,/#startSudden\{/);
  assert.match(preview,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
- assert.match(preview,/linear-gradient\(165deg,#2a9489/);
+ assert.match(preview,/linear-gradient\(165deg,#ad607a 0%,#88455f 100%\)/);
+ assert.match(preview,/border:1\.5px solid #e0a0b9!important/);
  assert.match(preview,/linear-gradient\(165deg,#a32b47/);
  assert.match(preview,/styles de fin/);
  assert.doesNotMatch(preview,/Continue jusqu’à la première erreur\./);
