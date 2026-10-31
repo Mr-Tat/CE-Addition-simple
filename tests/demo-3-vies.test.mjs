@@ -22,7 +22,7 @@ test('essai 3 vies : prépare le véritable moteur sans changer le jeu connecté
  assert.match(preview,/linear-gradient\(165deg,#2a9489/);
  assert.match(preview,/linear-gradient\(165deg,#a32b47/);
  assert.match(preview,/styles de fin/);
- assert.doesNotMatch(preview,/Contin ue jusqu’à la première erreur/);
+ assert.doesNotMatch(preview,/Continue jusqu’à la première erreur\./);
  const js=preview.match(/<script>([\s\S]*?)<\/script>/)?.[1]?.trim();
  assert.ok(js);
  new Script(js);
