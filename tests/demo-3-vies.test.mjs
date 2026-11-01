@@ -80,10 +80,14 @@ test('essai 3 vies : prépare le véritable moteur sans changer le jeu connecté
  assert.ok(suddenButton.includes('<span class="score-mode-meta"><span class="score-mode-foot score-mode-bonus">+20 % de points</span></span>'));
  assert.match(output,/#menuScreen \.mode-card\.sudden #startThreeLives \.score-mode-meta\{background:rgba\(17,8,30,\.32\)!important/);
  assert.match(output,/#gameScreen #threeLivesHud\{position:absolute!important;[\s\S]*?border:1\.5px solid #73569c!important/);
- assert.match(output,/\.score-mode-meta\{display:flex!important;[\s\S]*?border:1px solid rgba\(255,234,246,\.24\)!important/);
+ assert.match(output,/\.score-mode-meta\{position:relative!important;display:flex!important;[\s\S]*?border:1px solid rgba\(255,234,246,\.24\)!important/);
  assert.doesNotMatch(livesButton,/score-mode-detail/);
  assert.doesNotMatch(suddenButton,/score-mode-detail/);
- assert.match(output,/\.score-mode-detail\{font-size:clamp\(\.65rem,\.8vw,\.74rem\)!important/);
+ assert.match(output,/\.score-mode-meta\{position:relative!important;display:flex!important/);
+ assert.match(output,/\.score-mode-meta:has\(>\.score-mode-detail\)\{padding-bottom:24px!important;min-height:55px!important\}/);
+ assert.match(output,/\.score-mode-detail\{position:absolute!important;right:6px!important;bottom:5px!important;[\s\S]*?text-align:right!important;[\s\S]*?font-size:clamp\(\.65rem,\.8vw,\.74rem\)!important/);
+ assert.match(output,/\.classic-count-btn\[data-count\]:has\(>\.classic-xp-remaining\)\{position:relative!important;[\s\S]*?padding-bottom:24px!important/);
+ assert.match(output,/\.classic-count-btn\[data-count\]>.classic-xp-remaining\{position:absolute!important;right:7px!important;bottom:5px!important;[\s\S]*?text-align:right!important/);
  assert.match(output,/\.score-mode-foot:not\(\.score-mode-bonus\)\{font-size:clamp\(\.65rem,\.8vw,\.74rem\)!important;[\s\S]*?font-weight:450!important;[\s\S]*?opacity:\.66!important/);
  assert.match(output,/\.score-mode-bonus\{opacity:1!important;display:inline-flex!important;[\s\S]*?border:1px solid rgba\(255,210,144,\.70\)!important;border-radius:999px!important/);
  // Le rappel provisoire est retiré de l'affichage sans toucher à l'isolation XP.
