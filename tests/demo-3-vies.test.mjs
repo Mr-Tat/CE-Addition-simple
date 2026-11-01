@@ -46,6 +46,20 @@ test('essai 3 vies : prépare le véritable moteur sans changer le jeu connecté
  assert.match(output,/rgba?\(/);
  assert.match(output,/fill="#303540"/);
  assert.match(output,/@keyframes heartLoss/);
+ // Les 3 cœurs sont dans le bandeau de session, à l'emplacement indiqué
+ // entre le menu et les pastilles de score sur écran large.
+ assert.match(output,/<div class="session-pill" id="sessionScore">Score : 0 \/ 10<\/div><div id="threeLivesHud" hidden aria-label="Trois vies au départ"><\/div>/);
+ assert.match(output,/#gameScreen \.session-bar\{position:relative!important\}/);
+ assert.match(output,/#gameScreen #threeLivesHud\{position:absolute!important;left:46%!important;top:50%!important/);
+ assert.match(output,/#gameScreen #threeLivesHud\[hidden\]\{display:none!important\}/);
+ assert.match(output,/@media\(max-width:1399px\)\{html:not\(\.mathas-handheld-portrait\) #gameScreen #threeLivesHud\{position:static!important/);
+ assert.match(output,/html\.mathas-handheld-portrait #gameScreen #threeLivesHud\{position:static!important/);
+ assert.match(output,/grid-area:2\/1\/3\/7!important/);
+ assert.match(output,/hud\.hidden=session\.mode!=="three-lives"/);
+ assert.match(output,/hud\.innerHTML=demoHeartHtml\(\)\.repeat\(3\)/);
+ assert.match(output,/session\.hearts--/);
+ assert.match(output,/heart\.classList\.add\("breaking"\)/);
+ assert.match(output,/heart\.classList\.add\("lost"\)/);
  assert.match(output,/mode-card sudden/);
  assert.match(output,/<h3 class="mode-title"><span class="score-mode-cup" aria-hidden="true">🏆<\/span> Défis de score<\/h3>/);
  assert.match(output,/<p class="mode-description">Deux façons de marquer un gros score\.<\/p>/);
