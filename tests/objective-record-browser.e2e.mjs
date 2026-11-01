@@ -25,7 +25,7 @@ test('menu et démarrage des trois vies sur Chromium PC et téléphone',async()=
    // 4/10/20 calculs restent sur une ligne et prennent moins de hauteur,
    // même avec l'aperçu XP fictif et sur un téléphone de 320 px.
    const compact=await frame.locator('#menuScreen .classic-count-btn[data-count]')
-    .evaluateAll(buttons=>buttons.map(b=>({label:b.firstChild?.textContent?.trim(),
+    .evaluateAll(buttons=>buttons.map(b=>({label:b.textContent.replace(/Reste \\d+ XP/g,'').replace(/\\s+/g,' ').trim(),
      height:b.getBoundingClientRect().height,whiteSpace:getComputedStyle(b).whiteSpace,
      scrollWidth:b.scrollWidth,clientWidth:b.clientWidth})));
    assert.equal(compact.length,3);
