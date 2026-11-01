@@ -19,8 +19,8 @@ test('essai 3 vies : prépare le véritable moteur sans changer le jeu connecté
  assert.match(preview,/#startThreeLives\{/);
  assert.match(preview,/#startSudden\{/);
  assert.match(preview,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
- assert.match(preview,/linear-gradient\(165deg,#9557a7 0%,#6d3d88 100%\)/);
- assert.match(preview,/border:1\.5px solid #d7a2ed!important/);
+ assert.match(preview,/linear-gradient\(165deg,#754287 0%,#502963 100%\)/);
+ assert.match(preview,/border:1\.5px solid #a77cbe!important/);
  assert.match(preview,/linear-gradient\(165deg,#a32b47/);
  assert.match(preview,/styles de fin/);
  // Le texte natif est encore le motif recherché pour la transformation ;
@@ -73,6 +73,8 @@ test('essai 3 vies : prépare le véritable moteur sans changer le jeu connecté
  assert.ok(livesButton && suddenButton);
  assert.ok(livesButton.includes('<span class="score-mode-meta"><span class="score-mode-foot">Sans trophée</span><span class="score-mode-detail">50 % des XP</span></span>'));
  assert.ok(suddenButton.includes('<span class="score-mode-meta"><span class="score-mode-foot score-mode-bonus">+20 % de points</span><span class="score-mode-detail">100 % des XP</span></span>'));
+ assert.match(output,/#menuScreen \.mode-card\.sudden #startThreeLives \.score-mode-meta\{background:rgba\(17,8,30,\.32\)!important/);
+ assert.match(output,/#gameScreen #threeLivesHud\{position:absolute!important;[\s\S]*?border:1\.5px solid #73569c!important/);
  assert.match(output,/\.score-mode-meta\{display:flex!important;[\s\S]*?border:1px solid rgba\(255,234,246,\.24\)!important/);
  assert.match(output,/\.score-mode-detail\{font-size:clamp\(\.72rem,1vw,\.84rem\)!important;[\s\S]*?font-weight:700!important/);
  assert.match(output,/\.score-mode-bonus\{display:inline-flex!important;[\s\S]*?border:1px solid rgba\(255,210,144,\.70\)!important;border-radius:999px!important/);
