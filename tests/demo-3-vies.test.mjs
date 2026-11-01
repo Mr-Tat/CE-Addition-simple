@@ -50,7 +50,7 @@ test('essai 3 vies : prépare le véritable moteur sans changer le jeu connecté
  // entre le menu et les pastilles de score sur écran large.
  assert.match(output,/<div class="session-pill" id="sessionScore">Score : 0 \/ 10<\/div><div id="threeLivesHud" hidden aria-label="Trois vies au départ"><\/div>/);
  assert.match(output,/#gameScreen \.session-bar\{position:relative!important\}/);
- assert.match(output,/#gameScreen #threeLivesHud\{position:absolute!important;left:46%!important;top:50%!important/);
+ assert.match(output,/#gameScreen #threeLivesHud\{position:absolute!important;left:43%!important;top:50%!important/);
  assert.match(output,/#gameScreen #threeLivesHud\[hidden\]\{display:none!important\}/);
  assert.match(output,/@media\(max-width:1399px\)\{html:not\(\.mathas-handheld-portrait\) #gameScreen #threeLivesHud\{position:static!important/);
  assert.match(output,/html\.mathas-handheld-portrait #gameScreen #threeLivesHud\{position:static!important/);
