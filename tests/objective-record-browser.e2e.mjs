@@ -27,13 +27,13 @@ test('menu et démarrage des trois vies sur Chromium PC et téléphone',async()=
    const compact=await frame.locator('#menuScreen .classic-count-btn[data-count]')
     .evaluateAll(buttons=>buttons.map(b=>({label:b.textContent.replace(/Reste \d+ XP/g,'').replace(/\s+/g,' ').trim(),
      height:b.getBoundingClientRect().height,whiteSpace:getComputedStyle(b).whiteSpace,
-     scrollWidth:b.scrollWidth,clientWidth:b.clientWidth})));
+     scrollWidth:b.scrollWidth,clientWidth:b.clientWidth,font:getComputedStyle(b).fontSize,parentWidth:b.parentElement?.getBoundingClientRect().width})));
    assert.equal(compact.length,3);
    for(const [i,c] of compact.entries()){
     assert.equal(c.label,['4 calculs','10 calculs','20 calculs'][i]);
     assert.equal(c.whiteSpace,'nowrap','Nombre et calculs doivent rester côte à côte');
     assert.ok(c.height<=70,'Bouton '+c.label+' trop haut : '+c.height+' px');
-    assert.ok(c.scrollWidth<=c.clientWidth+2,'Texte qui déborde : '+c.label);
+    assert.ok(c.scrollWidth<=c.clientWidth+2,'Texte qui déborde : '+JSON.stringify(c));
    }
    await page.locator('#xp-preview-mode').selectOption('free');
    assert.equal(await frame.locator('.classic-xp-remaining').count(),0);
