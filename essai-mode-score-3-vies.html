@@ -6,17 +6,30 @@
 <title>Math’as — essai « 3 vies » sur Addition simple</title>
 <style>
 :root{color-scheme:dark}*{box-sizing:border-box}
-body{margin:0;background:#091b2e;color:#f2f7ff;font:14px system-ui,-apple-system,Segoe UI,sans-serif}
-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 18px;background:#162e48;border-bottom:1px solid #477092}
+body{margin:0;background:#091b2e;color:#f2f7ff;font:14px system-ui,-apple-system,Segoe UI,sans-serif;height:100dvh;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;flex:none;padding:10px 18px;background:#162e48;border-bottom:1px solid #477092}
 header strong{font-size:15px}header small{color:#c1d5e8}a{color:#d4efff;font-weight:700}
+#preview-tools{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+#preview-tools label{color:#e6d5ff;font-weight:750;font-size:12px}
+#xp-preview-mode{background:#302243;color:#fff7ff;border:1px solid #9471bc;border-radius:10px;padding:8px 9px;max-width:250px;font:650 12px system-ui}
+#preview-tools small{color:#ffd99d;font-size:11px}
 #state{color:#ffd19b;max-width:600px;margin:16px auto}
-iframe{display:block;width:100%;height:calc(100dvh - 64px);border:0;background:#0c2235}
-@media(max-width:700px){header{padding:9px 10px;gap:5px;flex-wrap:wrap}header strong{font-size:13px}header small{font-size:11px}iframe{height:calc(100dvh - 84px)}}
+iframe{display:block;flex:1 1 auto;width:100%;height:auto;min-height:0;border:0;background:#0c2235}
+@media(max-width:700px){header{padding:9px 10px;gap:5px;flex-wrap:wrap}header strong{font-size:13px}header small{font-size:11px}iframe{height:auto}}
 </style>
 </head>
 <body>
 <header>
 <div><strong>🧪 Addition simple — essai « Objectif record »</strong><div><small>Moteur original · résultats, XP et trophées isolés de ton compte</small></div></div>
+<div id="preview-tools">
+<label for="xp-preview-mode">Affichage des XP :</label>
+<select id="xp-preview-mode">
+<option value="connected" selected>👤 Connect simulé · jalons disponibles</option>
+<option value="zero">👤 Connect simulé · tout acquis</option>
+<option value="free">Sans connexion</option>
+</select>
+<small>Exemples fictifs · aucun compte élève consulté</small>
+</div>
 <a href="./">↩ Jeu habituel</a>
 </header>
 <div id="state" role="alert">Préparation du jeu de démonstration…</div>
@@ -26,6 +39,27 @@ iframe{display:block;width:100%;height:calc(100dvh - 64px);border:0;background:#
  'use strict';
  const status=document.getElementById('state');
  const frame=document.getElementById('game');
+ const xpPreviewMode=document.getElementById('xp-preview-mode');
+ // Les chiffres ci-dessous sont des exemples visuels : ce prototype n'utilise
+ // aucun compte Connect, aucun droit élève ni aucune requête de récompense XP.
+ function renderConnectPreview(){
+   const doc=frame.contentDocument;
+   if(!doc||!xpPreviewMode)return;
+   for(const [id,total] of [['startThreeLives',10],['startSudden',20]]){
+     const meta=doc.querySelector('#'+id+' .score-mode-meta');
+     if(!meta)continue;
+     let line=meta.querySelector('.score-mode-detail');
+     if(xpPreviewMode.value==='free'){if(line)line.remove();continue;}
+     if(!line){
+       line=doc.createElement('span');
+       line.className='score-mode-detail';
+       meta.appendChild(line);
+     }
+     line.textContent='Reste '+(xpPreviewMode.value==='zero'?0:total)+' XP';
+   }
+ }
+ if(xpPreviewMode?.addEventListener)xpPreviewMode.addEventListener('change',renderConnectPreview);
+ if(frame?.addEventListener)frame.addEventListener('load',renderConnectPreview);
  function swap(text,from,to,label){
    const split=text.split(from);
    if(split.length!==2)throw Error('La version du moteur a changé : '+label);
@@ -75,6 +109,7 @@ iframe{display:block;width:100%;height:calc(100dvh - 64px);border:0;background:#
      "#menuScreen .mode-card.sudden .score-mode-meta{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:6px!important;width:min(100%,173px)!important;box-sizing:border-box!important;margin-top:5px!important;padding:7px 7px 8px!important;border:1px solid rgba(255,234,246,.24)!important;border-radius:10px!important;background:rgba(29,13,40,.16)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.055)!important}",
      "#menuScreen .mode-card.sudden #startThreeLives .score-mode-meta{background:rgba(17,8,30,.32)!important;border-color:rgba(210,171,230,.24)!important}",
      "#menuScreen .mode-card.sudden .score-mode-foot:not(.score-mode-bonus){font-size:clamp(.65rem,.8vw,.74rem)!important;line-height:1.18!important;font-weight:450!important;color:#dcc6d5!important;opacity:.66!important;text-shadow:none!important}",
+     "#menuScreen .mode-card.sudden .score-mode-detail{font-size:clamp(.65rem,.8vw,.74rem)!important;line-height:1.18!important;font-weight:450!important;color:#dcc6d5!important;opacity:.66!important;text-shadow:none!important}",
      "#menuScreen .mode-card.sudden .score-mode-bonus{opacity:1!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;max-width:100%!important;width:max-content!important;box-sizing:border-box!important;min-height:29px!important;padding:5px 8px!important;border:1px solid rgba(255,210,144,.70)!important;border-radius:999px!important;background:rgba(255,194,103,.17)!important;color:#ffe0a6!important;font-size:clamp(.71rem,1.04vw,.84rem)!important;font-weight:950!important;line-height:1.15!important;white-space:normal!important;text-align:center!important;box-shadow:inset 0 1px 0 rgba(255,239,197,.12)!important}",
      "#menuScreen .mode-card.sudden .score-mode-options > button:focus-visible{outline:3px solid #fff!important;outline-offset:3px!important}",
      "@media(hover:hover) and (pointer:fine){#menuScreen .mode-card.sudden .score-mode-options > button:hover{filter:brightness(1.10)!important;transform:translateY(-2px)!important}}",
@@ -101,6 +136,7 @@ iframe{display:block;width:100%;height:calc(100dvh - 64px);border:0;background:#
      " #menuScreen .mode-card.sudden .score-mode-options{gap:7px!important}",
      " #menuScreen .mode-card.sudden .score-mode-options > button{min-height:112px!important;padding:10px 5px!important}",
      " #menuScreen .mode-card.sudden .score-mode-foot:not(.score-mode-bonus){font-size:.64rem!important}",
+     " #menuScreen .mode-card.sudden .score-mode-detail{font-size:.64rem!important}",
      " #menuScreen .mode-card.sudden .score-mode-meta{width:100%!important;gap:5px!important;padding:6px 3px!important}",
      " #menuScreen .mode-card.sudden .score-mode-bonus{font-size:.67rem!important;padding:5px 5px!important;min-height:27px!important}",
      " #menuScreen .mode-card.sudden .score-mode-title-row .score-mode-name{font-size:.86rem!important}",

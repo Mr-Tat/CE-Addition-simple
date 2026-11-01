@@ -81,7 +81,9 @@ test('essai 3 vies : prépare le véritable moteur sans changer le jeu connecté
  assert.match(output,/#menuScreen \.mode-card\.sudden #startThreeLives \.score-mode-meta\{background:rgba\(17,8,30,\.32\)!important/);
  assert.match(output,/#gameScreen #threeLivesHud\{position:absolute!important;[\s\S]*?border:1\.5px solid #73569c!important/);
  assert.match(output,/\.score-mode-meta\{display:flex!important;[\s\S]*?border:1px solid rgba\(255,234,246,\.24\)!important/);
- assert.doesNotMatch(output,/score-mode-detail/);
+ assert.doesNotMatch(livesButton,/score-mode-detail/);
+ assert.doesNotMatch(suddenButton,/score-mode-detail/);
+ assert.match(output,/\.score-mode-detail\{font-size:clamp\(\.65rem,\.8vw,\.74rem\)!important/);
  assert.match(output,/\.score-mode-foot:not\(\.score-mode-bonus\)\{font-size:clamp\(\.65rem,\.8vw,\.74rem\)!important;[\s\S]*?font-weight:450!important;[\s\S]*?opacity:\.66!important/);
  assert.match(output,/\.score-mode-bonus\{opacity:1!important;display:inline-flex!important;[\s\S]*?border:1px solid rgba\(255,210,144,\.70\)!important;border-radius:999px!important/);
  // Le rappel provisoire est retiré de l'affichage sans toucher à l'isolation XP.
@@ -118,6 +120,44 @@ test('essai 3 vies : prépare le véritable moteur sans changer le jeu connecté
  for(const [index,match] of scripts.entries()){
    assert.doesNotThrow(()=>new Script(match[1]),'Script invalide '+index);
  }
+});
+
+
+test('aperçu fictif Connect : reste XP, zéro et aucune mention hors connexion',async()=>{
+ const loader=preview.match(/<script>([\s\S]*?)<\/script>/)?.[1]?.trim();
+ assert.ok(loader);
+ const listeners={},selector={value:'connected',addEventListener:(type,fn)=>listeners['select:'+type]=fn};
+ const makeLine=()=>({className:'',textContent:'',removed:false,remove(){this.removed=true}});
+ const meta=()=>({line:null,querySelector(){return this.line&&!this.line.removed?this.line:null},appendChild(value){this.line=value}});
+ const left=meta(),right=meta();
+ const dom={
+  querySelector(sel){return sel==='#startThreeLives .score-mode-meta'?left:sel==='#startSudden .score-mode-meta'?right:null},
+  createElement(tag){assert.equal(tag,'span');return makeLine()}
+ };
+ const frame={hidden:false,srcdoc:'',contentDocument:dom,addEventListener(type,fn){listeners['frame:'+type]=fn}};
+ const status={textContent:'',removed:false,remove(){this.removed=true}};
+ const doc={getElementById:id=>id==='state'?status:id==='game'?frame:id==='xp-preview-mode'?selector:null};
+ const loaderFn=new Function('document','fetch','return '+loader);
+ await loaderFn(doc,async()=>({ok:true,text:async()=>native}));
+ assert.equal(status.textContent,'');
+ assert.equal(status.removed,true);
+ assert.ok(frame.srcdoc.length>native.length);
+ assert.match(preview,/Exemples fictifs · aucun compte élève consulté/);
+ assert.match(preview,/Réseau désactivé dans cet essai/);
+ assert.equal(typeof listeners['frame:load'],'function');
+ assert.equal(typeof listeners['select:change'],'function');
+ listeners['frame:load']();
+ assert.equal(left.line.textContent,'Reste 10 XP');
+ assert.equal(right.line.textContent,'Reste 20 XP');
+ selector.value='zero';listeners['select:change']();
+ assert.equal(left.line.textContent,'Reste 0 XP');
+ assert.equal(right.line.textContent,'Reste 0 XP');
+ selector.value='free';listeners['select:change']();
+ assert.equal(left.querySelector('.score-mode-detail'),null);
+ assert.equal(right.querySelector('.score-mode-detail'),null);
+ selector.value='connected';listeners['select:change']();
+ assert.equal(left.querySelector('.score-mode-detail').textContent,'Reste 10 XP');
+ assert.equal(right.querySelector('.score-mode-detail').textContent,'Reste 20 XP');
 });
 
 test('essai 3 vies : impossible d’appliquer silencieusement une modification sur un autre moteur',async()=>{
