@@ -14,9 +14,9 @@ test('essai 3 vies : prépare le véritable moteur sans changer le jeu connecté
  assert.match(preview,/Deux façons de marquer un gros score\./);
  assert.match(preview,/essai « Objectif record »/);
  assert.doesNotMatch(preview,/XP et bonus présentés à titre indicatif dans cet essai/);
- assert.match(preview,/50 % des XP/);
+ assert.doesNotMatch(preview,/50 % des XP/);
  assert.match(preview,/Sans trophée/);
- assert.match(preview,/100 % des XP/);
+ assert.doesNotMatch(preview,/100 % des XP/);
  assert.match(preview,/\+20 % de points/);
  assert.match(preview,/#startThreeLives\{/);
  assert.match(preview,/#startSudden\{/);
@@ -73,12 +73,15 @@ test('essai 3 vies : prépare le véritable moteur sans changer le jeu connecté
  const livesButton=output.match(/<button[^>]*id="startThreeLives"[\s\S]*?<\/button>/)?.[0];
  const suddenButton=output.match(/<button[^>]*id="startSudden"[\s\S]*?<\/button>/)?.[0];
  assert.ok(livesButton && suddenButton);
- assert.ok(livesButton.includes('<span class="score-mode-meta"><span class="score-mode-foot">Sans trophée</span><span class="score-mode-detail">50 % des XP</span></span>'));
- assert.ok(suddenButton.includes('<span class="score-mode-meta"><span class="score-mode-foot score-mode-bonus">+20 % de points</span><span class="score-mode-detail">100 % des XP</span></span>'));
+ // Ce prototype tourne uniquement hors Connect : les montants XP ne doivent jamais apparaître.
+ assert.doesNotMatch(output,/Reste\\s+\\d+\\s*XP/);
+ assert.doesNotMatch(output,/50 % des XP|100 % des XP/);
+ assert.ok(livesButton.includes('<span class="score-mode-meta"><span class="score-mode-foot">Sans trophée</span></span>'));
+ assert.ok(suddenButton.includes('<span class="score-mode-meta"><span class="score-mode-foot score-mode-bonus">+20 % de points</span></span>'));
  assert.match(output,/#menuScreen \.mode-card\.sudden #startThreeLives \.score-mode-meta\{background:rgba\(17,8,30,\.32\)!important/);
  assert.match(output,/#gameScreen #threeLivesHud\{position:absolute!important;[\s\S]*?border:1\.5px solid #73569c!important/);
  assert.match(output,/\.score-mode-meta\{display:flex!important;[\s\S]*?border:1px solid rgba\(255,234,246,\.24\)!important/);
- assert.match(output,/\.score-mode-detail\{font-size:clamp\(\.65rem,\.8vw,\.74rem\)!important;[\s\S]*?font-weight:450!important;[\s\S]*?opacity:\.66!important/);
+ assert.doesNotMatch(output,/score-mode-detail/);
  assert.match(output,/\.score-mode-foot:not\(\.score-mode-bonus\)\{font-size:clamp\(\.65rem,\.8vw,\.74rem\)!important;[\s\S]*?font-weight:450!important;[\s\S]*?opacity:\.66!important/);
  assert.match(output,/\.score-mode-bonus\{opacity:1!important;display:inline-flex!important;[\s\S]*?border:1px solid rgba\(255,210,144,\.70\)!important;border-radius:999px!important/);
  // Le rappel provisoire est retiré de l'affichage sans toucher à l'isolation XP.
