@@ -76,8 +76,9 @@ test('essai 3 vies : prépare le véritable moteur sans changer le jeu connecté
  assert.match(output,/#menuScreen \.mode-card\.sudden #startThreeLives \.score-mode-meta\{background:rgba\(17,8,30,\.32\)!important/);
  assert.match(output,/#gameScreen #threeLivesHud\{position:absolute!important;[\s\S]*?border:1\.5px solid #73569c!important/);
  assert.match(output,/\.score-mode-meta\{display:flex!important;[\s\S]*?border:1px solid rgba\(255,234,246,\.24\)!important/);
- assert.match(output,/\.score-mode-detail\{font-size:clamp\(\.72rem,1vw,\.84rem\)!important;[\s\S]*?font-weight:700!important/);
- assert.match(output,/\.score-mode-bonus\{display:inline-flex!important;[\s\S]*?border:1px solid rgba\(255,210,144,\.70\)!important;border-radius:999px!important/);
+ assert.match(output,/\.score-mode-detail\{font-size:clamp\(\.65rem,\.8vw,\.74rem\)!important;[\s\S]*?font-weight:450!important;[\s\S]*?opacity:\.66!important/);
+ assert.match(output,/\.score-mode-foot:not\(\.score-mode-bonus\)\{font-size:clamp\(\.65rem,\.8vw,\.74rem\)!important;[\s\S]*?font-weight:450!important;[\s\S]*?opacity:\.66!important/);
+ assert.match(output,/\.score-mode-bonus\{opacity:1!important;display:inline-flex!important;[\s\S]*?border:1px solid rgba\(255,210,144,\.70\)!important;border-radius:999px!important/);
  // Le rappel XP reste indicatif : aucun crédit nouveau dans cet essai.
  assert.match(output,/XP et bonus présentés à titre indicatif dans cet essai/);
 
