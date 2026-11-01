@@ -60,7 +60,22 @@ iframe{display:block;flex:1 1 auto;width:100%;height:auto;min-height:0;border:0;
    // Barème natif Connect, par niveau : 4/4=22, 10=30+6 bonus,
    // 20=50+10 bonus. Simulation des droits encore disponibles.
    const classicFullXp={'4':22,'10':36,'20':60};
+   // Menu mobile : agrandir la largeur utile des trois séries de calculs.
+   doc.querySelectorAll('#menuScreen .mathas-series-panel').forEach(panel=>{
+     panel.style.setProperty('gap','4px','important');
+     panel.style.setProperty('padding-left','4px','important');
+     panel.style.setProperty('padding-right','4px','important');
+   });
    doc.querySelectorAll('#menuScreen button.classic-count-btn[data-count]').forEach(button=>{
+     // Le CSS natif peut imposer des retours à la ligne plus spécifiques.
+     // Forçage visuel réservé à cet essai, sans changer le vrai jeu.
+     for(const [name,value] of [
+       ['box-sizing','border-box'],['display','flex'],['flex-direction','row'],
+       ['align-items','center'],['justify-content','center'],
+       ['white-space','nowrap'],['min-height','56px'],
+       ['font-size','clamp(.66rem,2.7vw,1rem)'],['line-height','1.12'],
+       ['padding',xpPreviewMode.value==='free'?'5px 4px 7px':'5px 4px 19px']
+     ])button.style.setProperty(name,value,'important');
      const total=classicFullXp[button.getAttribute('data-count')];
      if(total===undefined)return;
      let line=button.querySelector('.classic-xp-remaining');
@@ -127,7 +142,9 @@ iframe{display:block;flex:1 1 auto;width:100%;height:auto;min-height:0;border:0;
      "#menuScreen .mode-card.sudden .score-mode-meta:has(>.score-mode-detail){padding-bottom:24px!important;min-height:55px!important}",
      "#menuScreen .mode-card.sudden .score-mode-detail{position:absolute!important;right:6px!important;bottom:5px!important;max-width:calc(100% - 10px)!important;text-align:right!important;white-space:nowrap!important;font-size:clamp(.65rem,.8vw,.74rem)!important;line-height:1.18!important;font-weight:450!important;color:#dcc6d5!important;opacity:.66!important;text-shadow:none!important}",
      "/* Simulation des XP restants également sur les séries natives 4, 10 et 20. */",
-     "#menuScreen .classic-count-btn[data-count]:has(>.classic-xp-remaining){position:relative!important;flex-direction:column!important;white-space:normal!important;gap:3px!important;min-height:73px!important;padding-top:7px!important;padding-bottom:24px!important}",
+     "/* Nombre et mot calculs sur une seule ligne ; XP fictifs dans le coin inferieur. */",
+     "#menuScreen .classic-count-btn[data-count]{white-space:nowrap!important;font-size:clamp(.66rem,2.7vw,1rem)!important;line-height:1.12!important}",
+     "#menuScreen .classic-count-btn[data-count]:has(>.classic-xp-remaining){position:relative!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;white-space:nowrap!important;min-height:56px!important;padding:5px 4px 19px!important;gap:0!important}",
      "#menuScreen .classic-count-btn[data-count]>.classic-xp-remaining{position:absolute!important;right:7px!important;bottom:5px!important;display:block!important;max-width:calc(100% - 10px)!important;text-align:right!important;font-size:clamp(.62rem,.75vw,.72rem)!important;line-height:1.18!important;font-weight:450!important;color:inherit!important;opacity:.68!important;text-shadow:none!important;white-space:nowrap!important;pointer-events:none!important}",
      "#menuScreen .mode-card.sudden .score-mode-bonus{opacity:1!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;max-width:100%!important;width:max-content!important;box-sizing:border-box!important;min-height:29px!important;padding:5px 8px!important;border:1px solid rgba(255,210,144,.70)!important;border-radius:999px!important;background:rgba(255,194,103,.17)!important;color:#ffe0a6!important;font-size:clamp(.71rem,1.04vw,.84rem)!important;font-weight:950!important;line-height:1.15!important;white-space:normal!important;text-align:center!important;box-shadow:inset 0 1px 0 rgba(255,239,197,.12)!important}",
      "#menuScreen .mode-card.sudden .score-mode-options > button:focus-visible{outline:3px solid #fff!important;outline-offset:3px!important}",
