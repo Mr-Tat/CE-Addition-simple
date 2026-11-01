@@ -22,6 +22,19 @@ test('menu et démarrage des trois vies sur Chromium PC et téléphone',async()=
    const right=await frame.locator('#startSudden').boundingBox();
    assert.ok(left&&right);
    assert.ok(left.x+left.width<=right.x+2,'Boutons qui se chevauchent à cette résolution');
+   // 4/10/20 calculs restent sur une ligne et prennent moins de hauteur,
+   // même avec l'aperçu XP fictif et sur un téléphone de 320 px.
+   const compact=await frame.locator('#menuScreen .classic-count-btn[data-count]')
+    .evaluateAll(buttons=>buttons.map(b=>({label:b.firstChild?.textContent?.trim(),
+     height:b.getBoundingClientRect().height,whiteSpace:getComputedStyle(b).whiteSpace,
+     scrollWidth:b.scrollWidth,clientWidth:b.clientWidth})));
+   assert.equal(compact.length,3);
+   for(const [i,c] of compact.entries()){
+    assert.equal(c.label,['4 calculs','10 calculs','20 calculs'][i]);
+    assert.equal(c.whiteSpace,'nowrap','Nombre et calculs doivent rester côte à côte');
+    assert.ok(c.height<=70,'Bouton '+c.label+' trop haut : '+c.height+' px');
+    assert.ok(c.scrollWidth<=c.clientWidth+2,'Texte qui déborde : '+c.label);
+   }
    await page.locator('#xp-preview-mode').selectOption('free');
    assert.equal(await frame.locator('.classic-xp-remaining').count(),0);
    await frame.locator('#startThreeLives').click();
