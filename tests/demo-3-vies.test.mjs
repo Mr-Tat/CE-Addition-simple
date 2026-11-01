@@ -12,6 +12,8 @@ test('essai 3 vies : prépare le véritable moteur sans changer le jeu connecté
  assert.match(preview,/Storage\.prototype\.setItem=function\(key,value\)/);
  assert.match(preview,/Réseau désactivé dans cet essai/);
  assert.match(preview,/Deux façons de marquer un gros score\./);
+ assert.match(preview,/essai « Objectif record »/);
+ assert.doesNotMatch(preview,/XP et bonus présentés à titre indicatif dans cet essai/);
  assert.match(preview,/50 % des XP/);
  assert.match(preview,/Sans trophée/);
  assert.match(preview,/100 % des XP/);
@@ -61,7 +63,7 @@ test('essai 3 vies : prépare le véritable moteur sans changer le jeu connecté
  assert.match(output,/heart\.classList\.add\("breaking"\)/);
  assert.match(output,/heart\.classList\.add\("lost"\)/);
  assert.match(output,/mode-card sudden/);
- assert.match(output,/<h3 class="mode-title"><span class="score-mode-cup" aria-hidden="true">🏆<\/span> Défis de score<\/h3>/);
+ assert.match(output,/<h3 class="mode-title"><span class="score-mode-cup" aria-hidden="true">🏆<\/span> Objectif record<\/h3>/);
  assert.match(output,/<p class="mode-description">Deux façons de marquer un gros score\.<\/p>/);
  assert.match(output,/id="startThreeLives"[\s\S]*?<span class="score-mode-name">3 vies<\/span>/);
  assert.match(output,/id="startSudden"[\s\S]*?<span class="score-mode-name">Mort subite<\/span>/);
@@ -79,8 +81,14 @@ test('essai 3 vies : prépare le véritable moteur sans changer le jeu connecté
  assert.match(output,/\.score-mode-detail\{font-size:clamp\(\.65rem,\.8vw,\.74rem\)!important;[\s\S]*?font-weight:450!important;[\s\S]*?opacity:\.66!important/);
  assert.match(output,/\.score-mode-foot:not\(\.score-mode-bonus\)\{font-size:clamp\(\.65rem,\.8vw,\.74rem\)!important;[\s\S]*?font-weight:450!important;[\s\S]*?opacity:\.66!important/);
  assert.match(output,/\.score-mode-bonus\{opacity:1!important;display:inline-flex!important;[\s\S]*?border:1px solid rgba\(255,210,144,\.70\)!important;border-radius:999px!important/);
- // Le rappel XP reste indicatif : aucun crédit nouveau dans cet essai.
- assert.match(output,/XP et bonus présentés à titre indicatif dans cet essai/);
+ // Le rappel provisoire est retiré de l'affichage sans toucher à l'isolation XP.
+ assert.doesNotMatch(output,/XP et bonus présentés à titre indicatif dans cet essai/);
+ assert.doesNotMatch(output,/score-mode-tip/);
+ assert.match(output,/aria-label="Objectif record"/);
+ assert.match(output,/#menuScreen \.mode-card\.sudden\{align-content:start!important;row-gap:5px!important\}/);
+ assert.match(output,/#menuScreen \.mode-card\.sudden \.mode-settings\{min-width:0!important;width:100%!important;margin-top:0!important;padding-top:0!important\}/);
+ assert.match(output,/margin:4px 0 0!important;grid-column:1\/-1!important/);
+ assert.doesNotMatch(output,/Défis de score/);
 
  // Le moteur d'origine réécrit parfois son premier span pour gérer les verrous :
  // réserver une cible masquée évite de détruire le texte et l'icône du bouton.
