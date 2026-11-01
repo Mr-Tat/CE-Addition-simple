@@ -78,8 +78,13 @@ iframe{display:block;width:100%;height:calc(100dvh - 64px);border:0;background:#
      "@media(hover:hover) and (pointer:fine){#menuScreen .mode-card.sudden .score-mode-options > button:hover{filter:brightness(1.10)!important;transform:translateY(-2px)!important}}",
      "#menuScreen .mode-card.sudden .score-mode-options > button:active{transform:translateY(2px)!important;box-shadow:inset 0 2px 5px #0004!important}",
      "#menuScreen .mode-card.sudden .score-mode-tip{font-size:.72rem!important;line-height:1.25!important;color:#ccb8ce!important;opacity:.80!important;text-align:center!important;margin:9px 0 0!important;grid-column:1/-1!important}",
-     "#threeLivesHud{grid-column:1/-1;display:flex;justify-content:center;align-items:center;gap:12px;padding:8px 10px;border:1px solid #477e83;border-radius:10px;background:#173b4a;min-height:62px}",
-     "#threeLivesHud[hidden]{display:none!important}",
+     "#gameScreen .session-bar{position:relative!important}",
+     "#gameScreen #threeLivesHud{position:absolute!important;left:43%!important;top:50%!important;transform:translate(-50%,-50%)!important;z-index:4!important;box-sizing:border-box!important;display:flex!important;justify-content:center!important;align-items:center!important;gap:8px!important;width:max-content!important;max-width:100%!important;min-height:61px!important;padding:6px 12px!important;border:1.5px solid #9a78c6!important;border-radius:14px!important;background:linear-gradient(180deg,rgba(62,41,88,.96),rgba(31,24,53,.98))!important;box-shadow:inset 0 1px 0 #ffffff18,0 3px 10px #0005!important;white-space:nowrap!important}",
+     "body.light-mode #gameScreen #threeLivesHud,body.light #gameScreen #threeLivesHud{background:linear-gradient(180deg,#f3e8ff,#dfd5f2)!important;border-color:#9874b7!important;box-shadow:0 3px 10px #32254b24!important}",
+     "@media(max-width:1399px){html:not(.mathas-handheld-portrait) #gameScreen #threeLivesHud{position:static!important;left:auto!important;top:auto!important;transform:none!important;grid-column:1/-1!important;grid-row:2!important;justify-self:center!important;margin:1px auto 0!important;min-height:54px!important}}",
+     "html.mathas-handheld-portrait #gameScreen #threeLivesHud{position:static!important;left:auto!important;top:auto!important;transform:none!important;grid-area:2/1/3/7!important;justify-self:center!important;margin:5px auto 0!important;min-height:46px!important;padding:3px 9px!important}",
+     "html.mathas-handheld-portrait #gameScreen #threeLivesHud .demo-heart{width:34px!important;height:34px!important}",
+     "#gameScreen #threeLivesHud[hidden]{display:none!important}",
      "#threeLivesHud .demo-heart{display:block;position:relative;width:44px;height:44px;flex:none;filter:drop-shadow(0 2px 3px #0005)}",
      "#threeLivesHud .demo-heart svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}",
      "#threeLivesHud .demo-heart .whole{transition:opacity .18s ease}",
@@ -97,10 +102,10 @@ iframe{display:block;width:100%;height:calc(100dvh - 64px);border:0;background:#
      " #menuScreen .mode-card.sudden .score-mode-detail{font-size:.72rem!important}",
      " #menuScreen .mode-card.sudden .score-mode-foot{font-size:.69rem!important}",
      " #menuScreen .mode-card.sudden .score-mode-title-row .score-mode-name{font-size:.86rem!important}",
-     " #threeLivesHud .demo-heart{width:38px;height:38px}",
+     " #gameScreen #threeLivesHud .demo-heart{width:38px;height:38px}",
      "}",
      "@media(prefers-reduced-motion:reduce){",
-     " #threeLivesHud .demo-heart.breaking{animation:none}",
+     " #gameScreen #threeLivesHud .demo-heart.breaking{animation:none}",
      " #threeLivesHud .demo-heart .left-half,#threeLivesHud .demo-heart .right-half{transition:none}",
      " #menuScreen .mode-card.sudden .score-mode-options > button{transition:none!important}",
      "}",
@@ -122,6 +127,8 @@ iframe{display:block;width:100%;height:calc(100dvh - 64px);border:0;background:#
      '<div class="session-pill" id="sessionScore">Score : 0 / 10</div><div id="threeLivesHud" hidden aria-label="Trois vies au départ"></div>',
      'emplacement des trois cœurs');
 
+   // Les cœurs sont dans un cadre flottant au centre de la barre de session ;
+   // pas de ligne supplémentaire sur PC, contrairement à l'ancienne grille 1/-1.
    // La session trois vies ne partage aucun record, bonus XP ou trophée avec la Mort subite.
    const helpers=[
      '  function demoHeartHtml(){',
