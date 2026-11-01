@@ -23,8 +23,8 @@ test('essai 3 vies : prépare le véritable moteur sans changer le jeu connecté
  assert.match(preview,/border:1\.5px solid #d7a2ed!important/);
  assert.match(preview,/linear-gradient\(165deg,#a32b47/);
  assert.match(preview,/styles de fin/);
- // La vieille phrase peut figurer dans la source native, mais plus dans une écriture active.
- assert.doesNotMatch(preview,/if\(suddenDesc\)suddenDesc\.textContent/);
+ // Le texte natif est encore le motif recherché pour la transformation ;
+ // les assertions sur `output` ci-dessous vérifient les gardes effectivement injectés.
  const js=preview.match(/<script>([\s\S]*?)<\/script>/)?.[1]?.trim();
  assert.ok(js);
  new Script(js);
