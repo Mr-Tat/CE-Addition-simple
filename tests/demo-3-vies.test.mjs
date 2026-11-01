@@ -19,8 +19,8 @@ test('essai 3 vies : prépare le véritable moteur sans changer le jeu connecté
  assert.match(preview,/#startThreeLives\{/);
  assert.match(preview,/#startSudden\{/);
  assert.match(preview,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
- assert.match(preview,/linear-gradient\(165deg,#ad607a 0%,#88455f 100%\)/);
- assert.match(preview,/border:1\.5px solid #e0a0b9!important/);
+ assert.match(preview,/linear-gradient\(165deg,#9557a7 0%,#6d3d88 100%\)/);
+ assert.match(preview,/border:1\.5px solid #d7a2ed!important/);
  assert.match(preview,/linear-gradient\(165deg,#a32b47/);
  assert.match(preview,/styles de fin/);
  assert.doesNotMatch(preview,/Continue jusqu’à la première erreur\./);
@@ -55,6 +55,15 @@ test('essai 3 vies : prépare le véritable moteur sans changer le jeu connecté
  assert.match(output,/id="startSudden"[\s\S]*?<span class="mathas-lock-target" aria-hidden="true" hidden>Mort subite<\/span>/);
  assert.match(output,/\.mathas-lock-target\{display:none!important\}/);
  assert.ok(output.lastIndexOf('id="three-lives-preview-style"')>output.indexOf('id="mathas-p100-portrait-menu"'));
+ // Anciens styles natifs : le bouton Mort subite était forcé sur deux colonnes.
+ // La page d'essai impose explicitement un choix par colonne.
+ assert.match(output,/#startThreeLives\{grid-column:1!important;grid-row:1!important/);
+ assert.match(output,/#startSudden\{grid-column:2!important;grid-row:1!important/);
+ assert.match(output,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+ // Un autre script natif remplaçait la phrase et tout le contenu du bouton.
+ assert.match(output,/if\(suddenDesc&&!window\.__mathasThreeLivesDemo\)suddenDesc\.textContent/);
+ assert.match(output,/if\(suddenBtn&&!window\.__mathasThreeLivesDemo\)suddenBtn\.textContent/);
+ assert.match(output,/suddenBtn\.addEventListener\('click',syncMaxBeforeSave,true\)/);
  assert.match(output,/class="classic-count-btn" data-count="4"/);
  assert.match(output,/class="classic-count-btn" data-count="10"/);
  assert.match(output,/class="classic-count-btn" data-count="20"/);
