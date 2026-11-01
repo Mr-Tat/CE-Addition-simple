@@ -80,7 +80,7 @@ test('essai 3 vies : prépare le véritable moteur sans changer le jeu connecté
  assert.ok(suddenButton.includes('<span class="score-mode-meta"><span class="score-mode-foot score-mode-bonus">+20 % de points</span></span>'));
  assert.match(output,/#menuScreen \.mode-card\.sudden #startThreeLives \.score-mode-meta\{background:rgba\(17,8,30,\.32\)!important/);
  assert.match(output,/#gameScreen #threeLivesHud\{position:absolute!important;[\s\S]*?border:1\.5px solid #73569c!important/);
- assert.match(output,/\.score-mode-meta\{display:flex!important;[\s\S]*?border:1px solid rgba\(255,234,246,\.24\)!important/);
+ assert.match(output,/\.score-mode-meta\{position:relative!important;display:flex!important;[\s\S]*?border:1px solid rgba\(255,234,246,\.24\)!important/);
  assert.doesNotMatch(livesButton,/score-mode-detail/);
  assert.doesNotMatch(suddenButton,/score-mode-detail/);
  assert.match(output,/\.score-mode-meta\{position:relative!important;display:flex!important/);
