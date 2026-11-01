@@ -65,6 +65,20 @@ test('essai 3 vies : prépare le véritable moteur sans changer le jeu connecté
  assert.match(output,/<p class="mode-description">Deux façons de marquer un gros score\.<\/p>/);
  assert.match(output,/id="startThreeLives"[\s\S]*?<span class="score-mode-name">3 vies<\/span>/);
  assert.match(output,/id="startSudden"[\s\S]*?<span class="score-mode-name">Mort subite<\/span>/);
+
+ // Les deux lignes secondaires ont été inversées selon le montage professeur,
+ // et occupent chacune un petit cadre discret à l'intérieur du vrai bouton.
+ const livesButton=output.match(/<button[^>]*id="startThreeLives"[\s\S]*?<\/button>/)?.[0];
+ const suddenButton=output.match(/<button[^>]*id="startSudden"[\s\S]*?<\/button>/)?.[0];
+ assert.ok(livesButton && suddenButton);
+ assert.ok(livesButton.includes('<span class="score-mode-meta"><span class="score-mode-foot">Sans trophée</span><span class="score-mode-detail">50 % des XP</span></span>'));
+ assert.ok(suddenButton.includes('<span class="score-mode-meta"><span class="score-mode-foot score-mode-bonus">+20 % de points</span><span class="score-mode-detail">100 % des XP</span></span>'));
+ assert.match(output,/\.score-mode-meta\{display:flex!important;[\s\S]*?border:1px solid rgba\(255,234,246,\.24\)!important/);
+ assert.match(output,/\.score-mode-detail\{font-size:clamp\(\.72rem,1vw,\.84rem\)!important;[\s\S]*?font-weight:700!important/);
+ assert.match(output,/\.score-mode-bonus\{display:inline-flex!important;[\s\S]*?border:1px solid rgba\(255,210,144,\.70\)!important;border-radius:999px!important/);
+ // Le rappel XP reste indicatif : aucun crédit nouveau dans cet essai.
+ assert.match(output,/XP et bonus présentés à titre indicatif dans cet essai/);
+
  // Le moteur d'origine réécrit parfois son premier span pour gérer les verrous :
  // réserver une cible masquée évite de détruire le texte et l'icône du bouton.
  assert.match(output,/id="startSudden"[\s\S]*?<span class="mathas-lock-target" aria-hidden="true" hidden>Mort subite<\/span>/);
