@@ -130,8 +130,18 @@ test('aperçu fictif Connect : reste XP, zéro et aucune mention hors connexion'
  const makeLine=()=>({className:'',textContent:'',removed:false,remove(){this.removed=true}});
  const meta=()=>({line:null,querySelector(){return this.line&&!this.line.removed?this.line:null},appendChild(value){this.line=value}});
  const left=meta(),right=meta();
+ const classicCounts=['4','10','20'];
+ const classics=classicCounts.map(count=>({
+   count,line:null,getAttribute(name){assert.equal(name,'data-count');return this.count},
+   querySelector(){return this.line&&!this.line.removed?this.line:null},
+   appendChild(element){this.line=element}
+ }));
  const dom={
   querySelector(sel){return sel==='#startThreeLives .score-mode-meta'?left:sel==='#startSudden .score-mode-meta'?right:null},
+  querySelectorAll(sel){
+    assert.equal(sel,'#menuScreen button.classic-count-btn[data-count]');
+    return classics;
+  },
   createElement(tag){assert.equal(tag,'span');return makeLine()}
  };
  const frame={hidden:false,srcdoc:'',contentDocument:dom,addEventListener(type,fn){listeners['frame:'+type]=fn}};
@@ -143,21 +153,28 @@ test('aperçu fictif Connect : reste XP, zéro et aucune mention hors connexion'
  assert.equal(status.removed,true);
  assert.ok(frame.srcdoc.length>native.length);
  assert.match(preview,/Exemples fictifs · aucun compte élève consulté/);
+ assert.match(preview,/const classicFullXp=\{'4':22,'10':36,'20':60\}/);
+ assert.match(preview,/\.classic-count-btn\[data-count\]>.classic-xp-remaining/);
  assert.match(preview,/Réseau désactivé dans cet essai/);
  assert.equal(typeof listeners['frame:load'],'function');
  assert.equal(typeof listeners['select:change'],'function');
  listeners['frame:load']();
  assert.equal(left.line.textContent,'Reste 10 XP');
  assert.equal(right.line.textContent,'Reste 20 XP');
+ assert.deepEqual(classics.map(btn=>btn.line.textContent),['Reste 22 XP','Reste 36 XP','Reste 60 XP']);
+ assert.deepEqual(classics.map(btn=>btn.line.className),['classic-xp-remaining','classic-xp-remaining','classic-xp-remaining']);
  selector.value='zero';listeners['select:change']();
  assert.equal(left.line.textContent,'Reste 0 XP');
  assert.equal(right.line.textContent,'Reste 0 XP');
+ assert.deepEqual(classics.map(btn=>btn.line.textContent),['Reste 0 XP','Reste 0 XP','Reste 0 XP']);
  selector.value='free';listeners['select:change']();
  assert.equal(left.querySelector('.score-mode-detail'),null);
  assert.equal(right.querySelector('.score-mode-detail'),null);
+ assert.ok(classics.every(btn=>btn.querySelector('.classic-xp-remaining')===null));
  selector.value='connected';listeners['select:change']();
  assert.equal(left.querySelector('.score-mode-detail').textContent,'Reste 10 XP');
  assert.equal(right.querySelector('.score-mode-detail').textContent,'Reste 20 XP');
+ assert.deepEqual(classics.map(btn=>btn.querySelector('.classic-xp-remaining').textContent),['Reste 22 XP','Reste 36 XP','Reste 60 XP']);
 });
 
 test('essai 3 vies : impossible d’appliquer silencieusement une modification sur un autre moteur',async()=>{
