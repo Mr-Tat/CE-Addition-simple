@@ -16,7 +16,7 @@ iframe{display:block;width:100%;height:calc(100dvh - 64px);border:0;background:#
 </head>
 <body>
 <header>
-<div><strong>🧪 Addition simple — essai « Défis de score »</strong><div><small>Moteur original · résultats, XP et trophées isolés de ton compte</small></div></div>
+<div><strong>🧪 Addition simple — essai « Objectif record »</strong><div><small>Moteur original · résultats, XP et trophées isolés de ton compte</small></div></div>
 <a href="./">↩ Jeu habituel</a>
 </header>
 <div id="state" role="alert">Préparation du jeu de démonstration…</div>
@@ -59,9 +59,10 @@ iframe{display:block;width:100%;height:calc(100dvh - 64px);border:0;background:#
      "/* La carte reste unique : titre, introduction, puis 2 grands boutons égaux. */",
      "#menuScreen .mode-card.sudden .mode-title{font-weight:950!important;letter-spacing:-.015em!important;color:#fff8fe!important;line-height:1.16!important}",
      "#menuScreen .mode-card.sudden .score-mode-cup{font-size:.91em;vertical-align:baseline;margin-right:5px}",
-     "#menuScreen .mode-card.sudden .mode-description{font-size:clamp(.88rem,1.6vw,1.12rem)!important;line-height:1.38!important;color:#f3bbcc!important;font-weight:500!important;margin:14px 0 0!important}",
-     "#menuScreen .mode-card.sudden .mode-settings{min-width:0!important;width:100%!important}",
-     "#menuScreen .mode-card.sudden .score-mode-options{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:clamp(8px,1vw,14px)!important;width:100%!important;min-width:0!important;max-width:none!important;align-items:stretch!important;margin:clamp(14px,2vw,27px) 0 0!important;grid-column:1/-1!important}",
+     "#menuScreen .mode-card.sudden .mode-description{font-size:clamp(.88rem,1.6vw,1.12rem)!important;line-height:1.38!important;color:#f3bbcc!important;font-weight:500!important;margin:4px 0 0!important;min-height:0!important}",
+     "#menuScreen .mode-card.sudden{align-content:start!important;row-gap:5px!important}",
+     "#menuScreen .mode-card.sudden .mode-settings{min-width:0!important;width:100%!important;margin-top:0!important;padding-top:0!important}",
+     "#menuScreen .mode-card.sudden .score-mode-options{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:clamp(8px,1vw,14px)!important;width:100%!important;min-width:0!important;max-width:none!important;align-items:stretch!important;margin:4px 0 0!important;grid-column:1/-1!important}",
      "#menuScreen .mode-card.sudden .score-mode-options > button{appearance:none!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;width:100%!important;min-width:0!important;max-width:none!important;min-height:118px!important;margin:0!important;padding:13px 9px 14px!important;border-radius:15px!important;white-space:normal!important;text-wrap:balance!important;overflow-wrap:normal!important;text-align:center!important;line-height:1.2!important;cursor:pointer!important;transition:filter .16s ease,transform .16s ease!important}",
      "#menuScreen .mode-card.sudden .score-mode-options > #startThreeLives{grid-column:1!important;grid-row:1!important;background:linear-gradient(165deg,#754287 0%,#502963 100%)!important;border:1.5px solid #a77cbe!important;color:#fff8ff!important;box-shadow:inset 0 1px 0 #ffffff20,inset 0 -2px 0 #2b163ba8,0 4px 0 #301b43,0 7px 13px #0003!important}",
      "#menuScreen .mode-card.sudden .score-mode-options > #startSudden{grid-column:2!important;grid-row:1!important;background:linear-gradient(165deg,#a32b47 0%,#7e253b 100%)!important;border:1.5px solid #eb7189!important;color:#fff8fa!important;box-shadow:inset 0 1px 0 #ffffff22,inset 0 -2px 0 #56192dbb,0 4px 0 #4f192b,0 7px 13px #0003!important}",
@@ -78,7 +79,6 @@ iframe{display:block;width:100%;height:calc(100dvh - 64px);border:0;background:#
      "#menuScreen .mode-card.sudden .score-mode-options > button:focus-visible{outline:3px solid #fff!important;outline-offset:3px!important}",
      "@media(hover:hover) and (pointer:fine){#menuScreen .mode-card.sudden .score-mode-options > button:hover{filter:brightness(1.10)!important;transform:translateY(-2px)!important}}",
      "#menuScreen .mode-card.sudden .score-mode-options > button:active{transform:translateY(2px)!important;box-shadow:inset 0 2px 5px #0004!important}",
-     "#menuScreen .mode-card.sudden .score-mode-tip{font-size:.72rem!important;line-height:1.25!important;color:#ccb8ce!important;opacity:.80!important;text-align:center!important;margin:9px 0 0!important;grid-column:1/-1!important}",
      "#gameScreen .session-bar{position:relative!important}",
      "#gameScreen #threeLivesHud{position:absolute!important;left:43%!important;top:50%!important;transform:translate(-50%,-50%)!important;z-index:4!important;box-sizing:border-box!important;display:flex!important;justify-content:center!important;align-items:center!important;gap:8px!important;width:max-content!important;max-width:100%!important;min-height:61px!important;padding:6px 12px!important;border:1.5px solid #73569c!important;border-radius:14px!important;background:linear-gradient(180deg,rgba(41,28,65,.97),rgba(21,17,39,.99))!important;box-shadow:inset 0 1px 0 #ffffff18,0 3px 10px #0005!important;white-space:nowrap!important}",
      "body.light-mode #gameScreen #threeLivesHud,body.light #gameScreen #threeLivesHud{background:linear-gradient(180deg,#f3e8ff,#dfd5f2)!important;border-color:#9874b7!important;box-shadow:0 3px 10px #32254b24!important}",
@@ -116,14 +116,14 @@ iframe{display:block;width:100%;height:calc(100dvh - 64px);border:0;background:#
    ].join('\n');
    game=swap(game,'</body>',visualCss+'</body>','styles de fin');
 
-   game=swap(game,'<h3 class="mode-title">Mort subite</h3>','<h3 class="mode-title"><span class="score-mode-cup" aria-hidden="true">🏆</span> Défis de score</h3>','titre de la carte');
+   game=swap(game,'<h3 class="mode-title">Mort subite</h3>','<h3 class="mode-title"><span class="score-mode-cup" aria-hidden="true">🏆</span> Objectif record</h3>','titre de la carte');
    game=swap(game,
      '<p class="mode-description">Deux additions à la fois. La première réponse fausse arrête immédiatement la partie.</p>',
      '<p class="mode-description">Deux façons de marquer un gros score.</p>',
      'description de la carte');
    game=swap(game,
      '<button class="btn btn-gold" id="startSudden" type="button">Lancer la mort subite</button>',
-     '<div class="score-mode-options" role="group" aria-label="Défis de score"><button id="startThreeLives" type="button" aria-label="3 vies : trois erreurs possibles, moitié des XP, sans trophée"><span class="score-mode-icon score-mode-hearts" aria-hidden="true">❤️❤️❤️</span><span class="score-mode-name">3 vies</span><span class="score-mode-meta"><span class="score-mode-foot">Sans trophée</span><span class="score-mode-detail">50 % des XP</span></span></button><button class="btn btn-gold" id="startSudden" type="button" aria-label="Mort subite : une erreur élimine, 100 % des XP et bonus de 20 % des points"><span class="mathas-lock-target" aria-hidden="true" hidden>Mort subite</span><span class="score-mode-title-row"><span class="score-mode-icon" aria-hidden="true">💀</span><span class="score-mode-name">Mort subite</span></span><span class="score-mode-meta"><span class="score-mode-foot score-mode-bonus">+20 % de points</span><span class="score-mode-detail">100 % des XP</span></span></button></div><p class="score-mode-tip">XP et bonus présentés à titre indicatif dans cet essai.</p>',
+     '<div class="score-mode-options" role="group" aria-label="Objectif record"><button id="startThreeLives" type="button" aria-label="3 vies : trois erreurs possibles, moitié des XP, sans trophée"><span class="score-mode-icon score-mode-hearts" aria-hidden="true">❤️❤️❤️</span><span class="score-mode-name">3 vies</span><span class="score-mode-meta"><span class="score-mode-foot">Sans trophée</span><span class="score-mode-detail">50 % des XP</span></span></button><button class="btn btn-gold" id="startSudden" type="button" aria-label="Mort subite : une erreur élimine, 100 % des XP et bonus de 20 % des points"><span class="mathas-lock-target" aria-hidden="true" hidden>Mort subite</span><span class="score-mode-title-row"><span class="score-mode-icon" aria-hidden="true">💀</span><span class="score-mode-name">Mort subite</span></span><span class="score-mode-meta"><span class="score-mode-foot score-mode-bonus">+20 % de points</span><span class="score-mode-detail">100 % des XP</span></span></button></div>',
      'boutons Défis de score');
    game=swap(game,
      '<div class="session-pill" id="sessionScore">Score : 0 / 10</div>',
