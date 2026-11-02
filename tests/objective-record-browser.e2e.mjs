@@ -80,7 +80,7 @@ test('LAB V2 — trophées et points visibles',async()=>{
    const cupBox=await mastery.evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height}});
    const last=boxes[2];
    assert.ok(cupBox && cupBox.y>=last.y+last.height-2,'Coupe placée sous les boutons, pas dans le tableau');
-   assert.ok(cupBox.x>=last.x-3 && cupBox.x+cupBox.width<=last.x+last.width+3,'Coupe sous le bouton 20 calculs (zone croix jaune)');
+   assert.ok(cupBox.x>=last.x-3 && cupBox.x+cupBox.width<=last.x+last.width+3,'Coupe sous le bouton 20 calculs (zone croix jaune) '+JSON.stringify({cupBox,last,boxes}));
    // Simuler un trophée déjà acquis UNIQUEMENT dans le stockage isolé du jeu.
    await cups.first().evaluate(()=>{
     const api=window.MathasPoints;
