@@ -36,7 +36,7 @@ function labUI(){
     if(!t)return;
     // Les cinq gabarits ont des CSS tardifs : priorite stable au texte 4/10/20.
     document.querySelectorAll("#menuScreen .classic-count-btn[data-count],#menuScreen .countBtn[data-count]").forEach(button=>{
-      button.style.setProperty("font-size","clamp(.83rem,2.1vw,1.125rem)","important");
+      button.style.setProperty("font-size","clamp(.72rem,2.1vw,1.125rem)","important");
       button.style.setProperty("line-height","1.12","important");
     });
     // La coupe de maîtrise n'est plus dans le tableau des records : elle ne
@@ -190,7 +190,7 @@ function labUI(){
    "#menuScreen #mathasTrophiesStrip:not(.is-platinum) .mathas-trophies-hint{font-size:clamp(.56rem,.98vw,.68rem)!important;font-weight:850!important;letter-spacing:.012em!important}",
    "@media(max-width:600px){html.mathas-handheld-portrait #menuScreen .mathas-v531-results > #mathasTrophiesStrip:not(.is-platinum) .mathas-trophies-badges{gap:3px!important}html.mathas-handheld-portrait #menuScreen .mathas-v531-results > #mathasTrophiesStrip:not(.is-platinum) .mathas-trophy-badge{min-height:24px!important;padding:3px 6px!important;gap:4px!important;border-radius:7px!important}html.mathas-handheld-portrait #menuScreen .mathas-v531-results > #mathasTrophiesStrip:not(.is-platinum) .mathas-trophy-name{font-size:clamp(.58rem,2.2vw,.68rem)!important;letter-spacing:0!important}html.mathas-handheld-portrait #menuScreen .mathas-v531-results > #mathasTrophiesStrip:not(.is-platinum) .mathas-trophy-count{font-size:clamp(.69rem,2.65vw,.86rem)!important}html.mathas-handheld-portrait #menuScreen .mathas-v531-results > #mathasTrophiesStrip:not(.is-platinum) .mathas-trophy-medal{font-size:clamp(.78rem,3vw,.92rem)!important}html.mathas-handheld-portrait #menuScreen .mathas-v531-results > #mathasTrophiesStrip:not(.is-platinum) .mathas-trophies-footer{padding:3px 1px 1px!important;margin:3px 0 0!important}}",
    "/* LAB V4 : typography, trophy spacing, burgundy three-lives accents. */",
-   "html body #menuScreen .classic-count-btn[data-count],html body #menuScreen .countBtn[data-count]{font-size:clamp(.83rem,2.1vw,1.125rem)!important;line-height:1.12!important}",
+   "html body #menuScreen .classic-count-btn[data-count],html body #menuScreen .countBtn[data-count]{font-size:clamp(.72rem,2.1vw,1.125rem)!important;line-height:1.12!important}",
    "#menuScreen .mlab-mastery-under-series{flex:0 0 auto!important;height:23px!important;min-height:23px!important;max-height:23px!important;padding-top:0!important;padding-bottom:0!important;margin-top:0!important}",
    "html body #menuScreen .mathas-v535-actions > .mode-card.classic > .mathas-v535-summary{margin-top:6px!important;padding-top:6px!important}",
    "#menuScreen .mode-card.sudden .score-mode-options > #startThreeLives,#menuScreen #startThreeLives{background:linear-gradient(165deg,#602d49 0%,#371c35 100%)!important;border-color:#a16c86!important;box-shadow:inset 0 1px 0 #ffffff17,inset 0 -2px 0 #281423b8,0 4px 0 #281826,0 7px 13px #0004!important}",
