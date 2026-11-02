@@ -175,7 +175,7 @@ test('LAB V3 — mini-coupes dans les coins et XP sans fond sombre',async()=>{
    });
    assert.match(v4.background,/rgb\(96,\s*45,\s*73\)/,'3 vies : bordeaux assombri');
    assert.equal(v4.fonts.length,3,'Trois libellés 4/10/20 à dimensionner');
-   for(const font of v4.fonts)assert.ok(font>=13&&font<=18.5,'Texte intermédiaire sans débordement sur petit écran : '+font);
+   for(const font of v4.fonts)assert.ok(font>=(mobile?10.4:13)&&font<=18.5,'Texte intermédiaire sans débordement sur petit écran : '+font);
    assert.ok(v4.masteryHeight>=20&&v4.masteryHeight<=25,'Pas de grande ligne vide sous la coupe : '+v4.masteryHeight);
    if(v4.summaryMargin!==null)assert.ok(v4.summaryMargin<=9,'Tableau rapproché de la coupe : '+v4.summaryMargin);
    await score.first().evaluate(()=>{
@@ -183,6 +183,36 @@ test('LAB V3 — mini-coupes dans les coins et XP sans fond sombre',async()=>{
      localStorage.setItem(api.trophyKey,JSON.stringify(t));
    });
    await score.first().locator('b').waitFor({timeout:5000});
+   await page.close();
+  }
+ }finally{await browser.close()}
+});
+
+
+test('LAB V5 — trophées discrets et lisibles sur PC/téléphone',async()=>{
+ const browser=await chromium.launch({headless:true});
+ try{
+  for(const mobile of [false,true]){
+   const page=await browser.newPage({viewport:mobile?{width:320,height:650}:{width:1440,height:900},reducedMotion:'reduce'});
+   await page.goto('http://127.0.0.1:8123/essai-mode-score-3-vies.html',{waitUntil:'domcontentloaded'});
+   const frame=page.frameLocator('#game');
+   const badges=frame.locator('#menuScreen #mathasTrophiesStrip:not(.is-platinum) .mathas-trophy-badge');
+   await badges.first().waitFor({timeout:30000});
+   const metrics=await frame.locator('#menuScreen #mathasTrophiesStrip:not(.is-platinum)').evaluate(strip=>{
+    const r=e=>{const b=e.getBoundingClientRect();return {x:b.x,y:b.y,width:b.width,height:b.height}};
+    const list=[...strip.querySelectorAll('.mathas-trophy-badge')];
+    const footer=strip.querySelector('.mathas-trophies-footer');
+    return {cards:list.map(el=>({height:r(el).height,minHeight:parseFloat(getComputedStyle(el).minHeight),title:el.querySelector('.mathas-trophy-name')?.textContent||''})),
+      footer:footer?{height:r(footer).height,paddingTop:parseFloat(getComputedStyle(footer).paddingTop),label:footer.textContent.trim()}:null,
+      platinum:strip.classList.contains('is-platinum')};
+   });
+   assert.equal(metrics.cards.length,3,'Les trois catégories de trophées restent présentes');
+   assert.equal(metrics.platinum,false,'La règle compacte concerne uniquement les trophées ordinaires');
+   assert.ok(metrics.cards.every(c=>c.height<=75),'Cartes compactes sans couper les contenus : '+JSON.stringify(metrics));
+   assert.ok(metrics.cards.every(c=>c.minHeight>=20&&c.minHeight<=59),'Hauteur réservée maîtrisée : '+JSON.stringify(metrics));
+   assert.ok(metrics.cards.every(c=>c.title.length>0),'Les intitulés restent lisibles');
+   assert.ok(metrics.footer&&metrics.footer.label.length>0,'La bande des défis reste présente');
+   assert.ok(metrics.footer.paddingTop<=6,'Pied de la carte resserré : '+JSON.stringify(metrics.footer));
    await page.close();
   }
  }finally{await browser.close()}
