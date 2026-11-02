@@ -62,11 +62,8 @@ iframe{display:block;flex:1 1 auto;width:100%;height:auto;min-height:0;border:0;
    // 20=50+10 bonus. Simulation des droits encore disponibles.
    const classicFullXp={'4':22,'10':36,'20':60};
    // Menu mobile : agrandir la largeur utile des trois séries de calculs.
-   doc.querySelectorAll('#menuScreen .mathas-series-panel').forEach(panel=>{
-     panel.style.setProperty('gap','4px','important');
-     panel.style.setProperty('padding-left','4px','important');
-     panel.style.setProperty('padding-right','4px','important');
-   });
+   // Préserver le gap, le padding et les proportions natifs de la rangée 4/10/20.
+   
    doc.querySelectorAll('#menuScreen button.classic-count-btn[data-count]').forEach(button=>{
      // Le CSS natif peut imposer des retours à la ligne plus spécifiques.
      // Forçage visuel réservé à cet essai, sans changer le vrai jeu.
