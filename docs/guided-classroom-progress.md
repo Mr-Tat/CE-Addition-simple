@@ -39,3 +39,9 @@ Comportement identique au pilote Multiplication simple et optimisation #295 : re
 - Le contrôleur reste calqué sur le pilote #295 (aucune requête automatique élève).
 - Le guidé ne donne ni XP, ni trophée, ni score.
 - **Blocage livraison** : Auth/Edge réels + profils fictifs approuvés, publication Pages et contrôle des autres jeux NON EXÉCUTÉS.
+
+## Optimisation contrôlée avant recette réelle — 12/11/2026
+- Élève : aucune minuterie réseau, seules les actions « Rejoindre » et « Suivant / Vérifier la suite » font un `status` ; les touches et la page précédente ne font aucun appel. Vérifié dans le Chromium à deux rôles par comptage des appels.
+- Saisies F5 : écritures `sessionStorage` regroupées après 300 ms, immédiates à la sortie/navigation, sans contenu élève sur Supabase.
+- Enseignant : un seul heartbeat toutes les 25 s **si une séance existe** ; aucun minuteur au repos ni après « Terminer ». Vérifié dans le Chromium, y compris après F5.
+- Portée : seulement Connect, moteur `game-original.html` intact ; aucune publication de cette branche au 12/11.
