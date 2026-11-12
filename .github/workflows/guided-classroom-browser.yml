@@ -1,0 +1,26 @@
+name: Addition simple — guidé collectif Chromium
+on:
+  pull_request:
+    paths:
+      - 'collective-*.mjs'
+      - 'collective-native-bridge.js'
+      - 'game-original.html'
+      - 'tests/guided-classroom.browser.mjs'
+      - '.github/workflows/guided-classroom-browser.yml'
+permissions:
+  contents: read
+jobs:
+  native-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Installer navigateur pour tests locaux
+        run: |
+          npm install --no-save --no-package-lock playwright@1.57.0
+          npx playwright install chromium --with-deps
+      - name: Deux rôles fictifs et vrai moteur
+        run: node --test tests/guided-classroom.browser.mjs
