@@ -32,3 +32,10 @@ Comportement identique au pilote Multiplication simple et optimisation #295 : re
 - Tests contrats et syntaxe : CI isolée verte. Chromium natif à deux profils, page obligatoire et copie identique : vert après alignement sur le vrai sélecteur `trainingChoiceBtn` et niveaux 3/5/7. Scénario F5 avec pavé réel ajouté, validation CI en cours.
 - Supabase : backend proposé dans Mathas-Connect PR #299, migration et Edge non déployées ; pas de recette hébergée authentifiée ni de fusion.
 - Les cinq nouvelles fonctions n'envoient aucun XP/score/trophée collectif, ne modifient pas `game-original.html`.
+
+## Retours de recette renforcée — 12 novembre 2026
+- Chromium natif, profils simulés professeur/élève : calculs communs, obligation, corrections réelles après erreur, navigation arrière, numéros stables, résultat professeur non injecté et F5 élève/enseignant OK ([exécution Addition simple](https://github.com/Mr-Tat/CE-Addition-simple/actions/runs/43271800955)).
+- L'état « réussi » restauré ne peut plus se baser sur un résultat juste avec une retenue exigée manquante ; tests dédiés de faux brouillons.
+- Le contrôleur reste calqué sur le pilote #295 (aucune requête automatique élève).
+- Le guidé ne donne ni XP, ni trophée, ni score.
+- **Blocage livraison** : Auth/Edge réels + profils fictifs approuvés, publication Pages et contrôle des autres jeux NON EXÉCUTÉS.
