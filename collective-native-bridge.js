@@ -31,7 +31,7 @@ const mathasGuidedBridge={
  },
  getConfig(){
   const maxDigits=Number(trainingMaxDigits.value);
-  return {level:maxDigits===5?1:maxDigits===6?2:maxDigits===7?3:0};
+  return {level:maxDigits===3?1:maxDigits===5?2:maxDigits===7?3:0};
  },
  status(){return {training:session?.mode==='training',collective:this.active,
   pageIndex:this.pageIndex,phase,finished:states?.length===2&&states.every(s=>s.solved)}},
@@ -95,7 +95,7 @@ const mathasGuidedBridge={
  enter(page,index,config){
   if(![1,2,3].includes(config?.level))return false;
   this.save();
-  trainingMaxDigits.value=String([5,6,7][config.level-1]);
+  trainingMaxDigits.value=String([3,5,7][config.level-1]);
   startSession('training');this.active=true;this.pageIndex=-1;
   return this.show(page,index);
  },
