@@ -2,6 +2,7 @@ name: Addition simple — guidé collectif Chromium
 on:
   pull_request:
     paths:
+      - 'docs/guided-classroom-progress.md'
       - 'collective-*.mjs'
       - 'collective-native-bridge.js'
       - 'game-original.html'
