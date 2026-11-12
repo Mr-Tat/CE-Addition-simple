@@ -24,3 +24,11 @@ Comportement identique au pilote Multiplication simple et optimisation #295 : re
 4. SQL/RLS et lease serveur ; tests moteur/Chromium 320,390,1160 ; CI et non-régression ; Pages + Edge + recette hébergée avec profils fictifs.
 
 **Statut :** initialisation technique seulement, aucune publication ni modification de scores/données réelles.
+
+## État d'implémentation (12/11/2026)
+- Hôte `index.html` : module guidé exclusivement Connect, chargement natif optionnel, appels Auth `connect-guided-written` avec `appKey`, absence de polling élève.
+- Pont `collective-native-bridge.js` : pages de deux additions, validation et reports natifs, réponses et corrections locales, bouton natif Suivant intercepté.
+- `collective-ui.mjs` et `collective-draft.mjs` : interface du pilote #295, classe, pages obligatoires, sauvegarde F5 locale à l'onglet.
+- Tests contrats et syntaxe : CI isolée verte. Chromium natif à deux profils, page obligatoire et copie identique : vert après alignement sur le vrai sélecteur `trainingChoiceBtn` et niveaux 3/5/7. Scénario F5 avec pavé réel ajouté, validation CI en cours.
+- Supabase : backend proposé dans Mathas-Connect PR #299, migration et Edge non déployées ; pas de recette hébergée authentifiée ni de fusion.
+- Les cinq nouvelles fonctions n'envoient aucun XP/score/trophée collectif, ne modifient pas `game-original.html`.
