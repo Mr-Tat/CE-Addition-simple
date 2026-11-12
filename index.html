@@ -364,9 +364,9 @@ if(mode==='connected'){
   const nativeSource=await response.text();
   const marker="primaryBtn.addEventListener('click',handlePrimary);";
   if(html.split(marker).length!==2)throw Error('moteur natif différent : interception non installée');
-  const hook=nativeSource+'\\nconst mathasOriginalHandlePrimary=handlePrimary;'
-   +'\\nhandlePrimary=function(...args){if(window.MathasGuidedBridge?.isCollectiveActive()&&phase==="review"){window.MathasGuidedBridge.onContinue?.();return}return mathasOriginalHandlePrimary(...args)};'
-   +'\\nprimaryBtn.addEventListener("click",handlePrimary);';
+  const hook=nativeSource+'\nconst mathasOriginalHandlePrimary=handlePrimary;'
+   +'\nhandlePrimary=function(...args){if(window.MathasGuidedBridge?.isCollectiveActive()&&phase==="review"){window.MathasGuidedBridge.onContinue?.();return}return mathasOriginalHandlePrimary(...args)};'
+   +'\nprimaryBtn.addEventListener("click",handlePrimary);';
   html=html.replace(marker,hook);
   classroomReady=true;
  }catch(error){console.warn('Guidé collectif désactivé, guidé individuel disponible.',error)}
