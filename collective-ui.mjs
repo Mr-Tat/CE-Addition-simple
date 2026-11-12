@@ -12,6 +12,15 @@ export function createAdditionSimpleCollective({iframe,teacher,call,onClose,clas
  // et la classe isolent les brouillons ; l'UUID de la séance les invalide.
  const drafts=teacher?null:createGuidedDraftStore({storage,classId,studentId});
  let restoredSessionId=null,saveTimer=null;
+ let teacherPresenceTimer=null;
+ const syncTeacherPresence=()=>{
+  if(!teacher)return;
+  if(session?.active&&teacherPresenceTimer===null){
+   teacherPresenceTimer=setInterval(()=>{void keepTeacherPresence()},25000);
+  }else if(!session?.active&&teacherPresenceTimer!==null){
+   clearInterval(teacherPresenceTimer);teacherPresenceTimer=null;
+  }
+ };
  // Clé propre à l'onglet. Elle survit à F5, pas à une ouverture ordinaire
  // dans un nouvel onglet (aucune donnée élève stockée ici).
  const hostKey='mathas.add.simple.guided.host-tab.'+classId;
@@ -67,11 +76,11 @@ export function createAdditionSimpleCollective({iframe,teacher,call,onClose,clas
   if(!validSession(s)){
    if(session&&joined){bridge?.leave();say('Le professeur a terminé la séance. Tu peux continuer en guidé individuel.')}
    drafts?.clear();restoredSessionId=null;
-   session=null;joined=false;practicing=false;index=-1;render();return;
+   session=null;joined=false;practicing=false;index=-1;syncTeacherPresence();render();return;
   }
   if(!sameSession(s)){bridge?.leave();bridge?.useSession?.(s.sessionId);session=s;joined=false;practicing=false;index=-1;restoredSessionId=null;clearAnswers();}
   else session=s;
-  render();
+  syncTeacherPresence();render();
  };
  async function poll(){
   // Aucune découverte périodique. Garder cette lecture explicite pour
@@ -432,7 +441,6 @@ export function createAdditionSimpleCollective({iframe,teacher,call,onClose,clas
    });
    if(!teacher)window.addEventListener('pagehide',flushDraft);
    if(teacher){
-    setInterval(()=>{void keepTeacherPresence()},25000);
     window.addEventListener('pagehide',event=>{
      if(event.persisted||!session?.active||!hostId)return;
      // Page vraiment quittée ou fermée : un changement d'onglet n'émet
