@@ -19,4 +19,4 @@ jobs:
         with:
           node-version: '22'
       - name: Contrat, sauvegarde et syntaxe de l'intégration
-        run: node --test tests/collective-contract.test.mjs tests/guided-classroom-static.test.mjs
+        run: node --test tests/collective-contract.test.mjs tests/guided-classroom-static.test.mjs tests/guided-draft-security.test.mjs
