@@ -1,4 +1,6 @@
-# Guidé collectif — Addition écrite simple (chantier en cours)
+# Guidé collectif — Addition écrite simple
+
+**Publication vérifiée le 17/11/2026 :** [PR #27 fusionnée](https://github.com/Mr-Tat/CE-Addition-simple/pull/27) ; [GitHub Pages réussi](https://github.com/Mr-Tat/CE-Addition-simple/actions/runs/44053092622). Le service `connect-guided-written` v1 est **actif** dans le projet Math'as Connect, table RLS dédiée appliquée via migration `guided_written_sessions_20261117`. Tests navigateur professeur/élève simulés réussis sur la version fusionnée, aucune donnée réelle ni barème modifié. **Recette Auth hébergée avec professeur et élève fictif encore à faire.** Les sections d'audit ci-dessous sont historiques ; elles peuvent mentionner « candidat non publié » car rédigées avant cette livraison. Les autorisations de classes existantes ne sont pas modifiées.
 
 ## Source réellement publiée
 Le catalogue Supabase `connect_apps` du 12/11/2026 associe `addition-ecrite-simple` à `https://mr-tat.github.io/CE-Addition-simple/`. Le dépôt actuel est donc `Mr-Tat/CE-Addition-simple` (distinct de `Mr-Tat/Addition-ecrite-simple`, source historique à ne pas écraser).
