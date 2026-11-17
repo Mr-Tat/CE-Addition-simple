@@ -291,3 +291,38 @@ test('Chromium moteur natif : enseignant lance, élève rejoint, page obligatoir
   await student.close();await teacher.close();
  }finally{await browser.close();await new Promise(r=>http.close(r))}
 });
+
+test('Dizaines d’abord : frappes rapides retenue puis unité, moteur natif addition simple',{timeout:120000},async()=>{
+ const http=server();
+ await new Promise(r=>http.listen(0,'127.0.0.1',r));
+ const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_BIN||undefined});
+ try{
+  const page=await browser.newPage();
+  await page.goto('http://127.0.0.1:'+http.address().port+'/fixture');
+  await page.waitForFunction(()=>!!document.querySelector('#game')?.contentWindow?.MathasGuidedBridge);
+  const values=await page.evaluate(operations=>{
+   const w=document.querySelector('#game').contentWindow,d=w.document;
+   const toggle=d.querySelector('#tensFirstToggle');
+   toggle.checked=true;toggle.dispatchEvent(new w.Event('change',{bubbles:true}));
+   const entered=w.MathasGuidedBridge.enter(operations,0,{level:1});
+   if(!entered)throw Error('moteur guidé non initialisé');
+   return true;
+  },[{"a":"999","b":"998"},{"a":"123","b":"111"}]);
+  assert.equal(values,true);
+  await page.waitForTimeout(80);
+  const result=await page.evaluate(()=>{
+   const w=document.querySelector('#game').contentWindow,d=w.document;
+   for(const digit of ["1","7","1","9"]){
+    const button=d.querySelector('#numpad .num-key[data-key="'+digit+'"]');
+    if(!button)throw Error('touche '+digit+' absente');
+    button.click();
+   }
+   const part=w.MathasGuidedBridge.snapshot().find(x=>x.index===0)?.states[0];
+   return {answers:part?.answerValues,carries:part?.carryValues};
+  });
+  assert.equal(result.carries[1],"1",'premier report');
+  assert.equal(result.answers[0],"7",'unité');
+  assert.equal(result.carries[2],"1",'report des dizaines');
+  assert.equal(result.answers[1],"9",'dizaine');
+ }finally{await browser.close();await new Promise(r=>http.close(r))}
+});
