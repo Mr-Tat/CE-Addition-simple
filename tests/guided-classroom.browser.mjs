@@ -46,7 +46,7 @@ test('Chromium moteur natif : enseignant lance, élève rejoint, page obligatoir
   if(role==='student'){
    assert.equal(action,'status','student writes or polls must not occur');studentReads++;
   }
-  if(action==='status'||action==='resume')return clone(state??{ok:true,active:false});
+  if(action==='status'||action==='resume')return {...clone(state??{ok:true,active:false}),...(role==='teacher'&&state?.active?{hostOwned:true}:{})};
   if(action==='heartbeat'||action==='closing')return {ok:true,active:true};
   assert.equal(role,'teacher');
   if(action==='start'){
