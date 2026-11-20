@@ -45,7 +45,7 @@ if((connectionCheckRequired||connectionError||teacherPlayer||requireConnect)&&mo
  const actions=document.createElement('div');actions.style.cssText='display:flex;gap:10px;flex-wrap:wrap;margin-top:20px';
  const retry=document.createElement('button');retry.textContent='Réessayer';retry.onclick=()=>location.reload();
  const classic=document.createElement('button');classic.textContent='Jouer sans synchronisation';
- classic.onclick=()=>{const target=new URL(location.href);target.searchParams.delete('joueur');target.searchParams.delete('requireConnect');target.searchParams.set('libre','1');location.assign(target.href)};
+ classic.onclick=()=>{const target=new window.URL(location.href);target.searchParams.delete('joueur');target.searchParams.delete('requireConnect');target.searchParams.set('libre','1');location.assign(target.href)};
  for(const b of [retry,classic])b.style.cssText='padding:12px;border:0;border-radius:10px;background:#176e8d;color:white;font:600 13px system-ui;cursor:pointer';
  actions.append(retry,classic);view.appendChild(actions);
 }else{
