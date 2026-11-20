@@ -74,7 +74,17 @@ test('Addition simple: absence de SDK refuse la certification, repli libre volon
     await free.waitFor({state:'visible',timeout:16000});
     assert.equal(await page.locator('iframe').count(),0,'no unverified official game');
     await free.click();
-    await page.frameLocator('iframe').locator('#menuScreen').waitFor({state:'visible',timeout:16000});
+    await page.waitForFunction(()=>new URLSearchParams(location.search).get('libre')==='1',null,{timeout:16000});
+    try{await page.frameLocator('iframe').locator('#menuScreen').waitFor({state:'visible',timeout:16000})}
+    catch(error){
+     const diagnosis=await page.evaluate(()=>({
+      url:location.href,message:document.getElementById('message')?.textContent,
+      iframe:!!document.querySelector('iframe'),
+      srcdocBytes:document.querySelector('iframe')?.getAttribute('srcdoc')?.length||0,
+      body:document.body?.innerText?.slice(0,400)
+     }));
+     throw Error('Repli libre indisponible: '+JSON.stringify({diagnosis,errors,error:String(error)}));
+    }
     const changed=new URL(page.url());
     assert.equal(changed.searchParams.get('class'),classId);
     assert.equal(changed.searchParams.get('libre'),'1');
