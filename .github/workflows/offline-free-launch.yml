@@ -1,0 +1,24 @@
+name: Addition simple — lancement libre sans Supabase
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'tests/offline-free-launch.browser.mjs'
+      - '.github/workflows/offline-free-launch.yml'
+permissions:
+  contents: read
+jobs:
+  native-free-play:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Installer Chromium local
+        run: |
+          npm install --no-save --no-package-lock playwright@1.57.0
+          npx playwright install chromium
+      - name: Tester guidé et classique en libre et repli depuis connexion indisponible
+        run: node --test --test-concurrency=1 tests/offline-free-launch.browser.mjs

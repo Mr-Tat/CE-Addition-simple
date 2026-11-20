@@ -1,8 +1,8 @@
 <!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Addition écrite simple | Math’as</title><style>body{font-family:system-ui;background:#0c2235;color:white;margin:0;padding:25px}#loading{max-width:620px;margin:12vh auto;padding:25px;border:1px solid #628ba7;border-radius:16px}a{color:#8ce7fc}</style></head><body><main id="loading"><h1>Math’as · Addition écrite simple</h1><p id="message">Chargement du jeu…</p><p><a href="https://mr-tat.github.io/Mathas-Connect/">Retour aux jeux</a></p></main><script type="module">
 const URL='https://awmhpfofacaglewammxt.supabase.co',KEY='sb_publishable_oI2Pyl3kXzmLkK-CBnw9Nw_66a4fZgM',APP='addition-ecrite-simple';
 const query=new URLSearchParams(location.search),classId=query.get('class')||'',UUID=/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i;
-const teacherPlayer=query.get('joueur')==='prof';
-const free=!teacherPlayer&&localStorage.getItem('mathas.connect.mode-libre.v1')==='1';let session=null,cloud=null,mode='free',revision=0,resetEpoch=0,initial=null,studentName='',connectionCheckRequired=false;
+const teacherPlayer=query.get('joueur')==='prof',requireConnect=query.get('requireConnect')==='1';
+const free=!teacherPlayer&&!requireConnect&&(query.get('libre')==='1'||localStorage.getItem('mathas.connect.mode-libre.v1')==='1');let session=null,cloud=null,mode='free',revision=0,resetEpoch=0,initial=null,studentName='',connectionCheckRequired=false,connectionError=false;
 const status=s=>document.getElementById('message').textContent=s;
 const originalPromise=fetch('./game-original.html').then(r=>{if(!r.ok)throw Error('Copie du jeu non disponible');return r.text()});
 // Un visiteur sans profil approuvé ouvre directement le jeu classique.
@@ -35,17 +35,17 @@ try{
    }
   }
  }
-}catch(e){console.warn('Vérification du profil de jeu indisponible.',e)}
+}catch(e){connectionError=true;console.warn('Vérification du profil de jeu indisponible.',e)}
 const original=await originalPromise;
 // Compte élève reconnu mais serveur indisponible : ne jamais enregistrer
 // silencieusement des parties Connect dans les résultats locaux.
-if((connectionCheckRequired||teacherPlayer)&&mode!=='connected'){
+if((connectionCheckRequired||connectionError||teacherPlayer||requireConnect)&&mode!=='connected'){
  const view=document.getElementById('loading');
  document.getElementById('message').textContent='Impossible de vérifier les sauvegardes du compte. Aucun résultat ne sera perdu : réessaie plus tard ou joue sans synchronisation.';
  const actions=document.createElement('div');actions.style.cssText='display:flex;gap:10px;flex-wrap:wrap;margin-top:20px';
  const retry=document.createElement('button');retry.textContent='Réessayer';retry.onclick=()=>location.reload();
  const classic=document.createElement('button');classic.textContent='Jouer sans synchronisation';
- classic.onclick=()=>{if(teacherPlayer)location.href=location.pathname+'?class='+encodeURIComponent(classId);else{localStorage.setItem('mathas.connect.mode-libre.v1','1');location.reload()}};
+ classic.onclick=()=>{const target=new window.URL(location.href);target.searchParams.delete('joueur');target.searchParams.delete('requireConnect');target.searchParams.set('libre','1');location.assign(target.href)};
  for(const b of [retry,classic])b.style.cssText='padding:12px;border:0;border-radius:10px;background:#176e8d;color:white;font:600 13px system-ui;cursor:pointer';
  actions.append(retry,classic);view.appendChild(actions);
 }else{
